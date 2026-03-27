@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Prodigious Cuts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--gold:#C8A96E;--gold-light:#E2CA9E;--dark:#0D0D0D;--dark-2:#1A1A1A;--dark-3:#252525;--white:#FAFAFA;--gray:#999;--radius:12px;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--white);min-height:100vh;}
+
+    /* Login screen */
+    .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;flex-direction:column;}
+    .login-card{background:var(--dark-2);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:36px 32px;width:100%;max-width:380px;}
+    .login-card h2{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:4px;}
+    .login-card p{color:var(--gray);font-size:14px;margin-bottom:24px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+    label{font-size:12px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+    input,select{background:var(--dark-3);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius);padding:13px 16px;color:var(--white);font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+    input:focus,select:focus{border-color:var(--gold);}
+    .btn{padding:13px 24px;border-radius:var(--radius);font-weight:600;font-size:14px;border:none;cursor:pointer;transition:all 0.3s;}
+    .btn-primary{background:var(--gold);color:var(--dark);width:100%;}
+    .btn-primary:hover{background:var(--gold-light);}
+    .btn-sm{padding:6px 14px;font-size:12px;border-radius:8px;}
+    .btn-danger{background:rgba(255,80,80,0.1);color:#ff6b6b;border:1px solid rgba(255,80,80,0.2);}
+    .btn-danger:hover{background:rgba(255,80,80,0.2);}
+    .btn-success{background:rgba(80,200,120,0.1);color:#50c878;border:1px solid rgba(80,200,120,0.2);}
+
+    /* Dashboard */
+    .dashboard{display:none;}
+    .dashboard.active{display:block;}
+
+    .top-bar{background:rgba(13,13,13,0.95);border-bottom:1px solid rgba(255,255,255,0.06);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .top-bar-logo img{height:36px;border-radius:6px;}
+    .admin-badge{background:rgba(200,169,110,0.12);color:var(--gold);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
+    .logout-btn{background:none;border:1px solid rgba(255,255,255,0.1);color:var(--gray);padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;}
+    .logout-btn:hover{border-color:rgba(255,80,80,0.3);color:#ff6b6b;}
+
+    .page{padding:24px 20px;max-width:800px;margin:0 auto;}
+
+    /* Stats */
+    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px;}
+    .stat-card{background:var(--dark-2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;}
+    .stat-card .num{font-family:'Playfair Display',serif;font-size:32px;font-weight:800;color:var(--gold);}
+    .stat-card .lbl{color:var(--gray);font-size:13px;margin-top:2px;}
+
+    /* Tabs */
+    .tabs{display:flex;background:var(--dark-2);border-radius:12px;padding:4px;margin-bottom:20px;gap:4px;}
+    .tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;font-weight:600;border-radius:9px;cursor:pointer;color:var(--gray);transition:all 0.2s;}
+    .tab.active{background:var(--gold);color:var(--dark);}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    /* Booking cards */
+    .booking-card{background:var(--dark-2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;margin-bottom:10px;}
+    .booking-card.today{border-color:rgba(200,169,110,0.25);background:rgba(200,169,110,0.04);}
+    .booking-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:8px;}
+    .booking-name{font-weight:700;font-size:15px;}
+    .booking-service{color:var(--gold);font-weight:600;font-size:14px;}
+    .booking-meta{color:var(--gray);font-size:13px;margin-bottom:12px;display:flex;gap:14px;flex-wrap:wrap;}
+    .booking-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+    .status{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+    .status-pending{background:rgba(255,200,50,0.12);color:#ffc832;}
+    .status-confirmed{background:rgba(200,169,110,0.15);color:var(--gold);}
+    .status-completed{background:rgba(80,200,120,0.12);color:#50c878;}
+    .status-cancelled{background:rgba(255,80,80,0.1);color:#ff6b6b;}
+
+    /* Client cards */
+    .client-card{background:var(--dark-2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:16px;}
+    .c-avatar{width:44px;height:44px;border-radius:50%;background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--gold);flex-shrink:0;}
+    .c-info .name{font-weight:600;font-size:15px;margin-bottom:2px;}
+    .c-info .detail{color:var(--gray);font-size:12px;}
+
+    /* Filter bar */
+    .filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+    .filter-btn{background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);color:var(--gray);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+    .filter-btn.active{background:var(--dark-3);border-color:var(--gold);color:var(--gold);}
+
+    .empty{text-align:center;padding:40px;color:var(--gray);}
+
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--dark-3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:14px 22px;border-radius:12px;font-size:14px;z-index:999;transition:transform 0.3s ease;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .toast.success{border-color:rgba(200,169,110,0.4);color:var(--gold);}
+    .toast.error{border-color:rgba(255,80,80,0.4);color:#ff6b6b;}
+  </style>
+</head>
+<body>
+
+  <!-- Login screen -->
+  <div class="login-screen" id="login-screen">
+    <div style="text-align:center;margin-bottom:28px;">
+      <img src="logo.jpg" alt="Prodigious Cuts" style="height:56px;border-radius:8px;">
+    </div>
+    <div class="login-card">
+      <h2>Admin Access</h2>
+      <p>Enter your admin password to continue.</p>
+      <form onsubmit="adminLogin(event)">
+        <div class="form-group">
+          <label>Admin Password</label>
+          <input type="password" id="admin-pass" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="admin-login-btn">Log In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="top-bar">
+      <img src="logo.jpg" alt="Prodigious Cuts" style="height:36px;border-radius:6px;">
+      <span class="admin-badge">Admin</span>
+      <button class="logout-btn" onclick="adminLogout()">Log Out</button>
+    </div>
+
+    <div class="page">
+      <!-- Stats -->
+      <div class="stats" id="stats-grid">
+        <div class="stat-card"><div class="num" id="stat-total">—</div><div class="lbl">Total Bookings</div></div>
+        <div class="stat-card"><div class="num" id="stat-pending">—</div><div class="lbl">Pending</div></div>
+        <div class="stat-card"><div class="num" id="stat-today">—</div><div class="lbl">Today</div></div>
+        <div class="stat-card"><div class="num" id="stat-clients">—</div><div class="lbl">Clients</div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('today')">Today</div>
+        <div class="tab" onclick="switchTab('bookings')">All Bookings</div>
+        <div class="tab" onclick="switchTab('clients')">Clients</div>
+      </div>
+
+      <!-- Today -->
+      <div class="tab-panel active" id="tab-today">
+        <div id="today-list"></div>
+      </div>
+
+      <!-- All Bookings -->
+      <div class="tab-panel" id="tab-bookings">
+        <div class="filter-bar" id="filter-bar">
+          <div class="filter-btn active" onclick="filterBookings('all', this)">All</div>
+          <div class="filter-btn" onclick="filterBookings('pending', this)">Pending</div>
+          <div class="filter-btn" onclick="filterBookings('confirmed', this)">Confirmed</div>
+          <div class="filter-btn" onclick="filterBookings('completed', this)">Completed</div>
+          <div class="filter-btn" onclick="filterBookings('cancelled', this)">Cancelled</div>
+        </div>
+        <div id="bookings-list"></div>
+      </div>
+
+      <!-- Clients -->
+      <div class="tab-panel" id="tab-clients">
+        <div id="clients-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let adminToken = localStorage.getItem('pc_admin_token');
+    let allBookings = [];
+    let allClients = [];
+
+    if (adminToken) showDashboard();
+
+    function showToast(msg, type='') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = 'toast show ' + type;
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    async function adminLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById('admin-pass').value;
+      const btn = document.getElementById('admin-login-btn');
+      btn.disabled = true; btn.textContent = 'Checking...';
+      try {
+        const res = await fetch('/api/admin/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({password: pass})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Wrong password');
+        adminToken = data.token;
+        localStorage.setItem('pc_admin_token', adminToken);
+        showDashboard();
+      } catch(err) { showToast(err.message, 'error'); }
+      finally { btn.disabled = false; btn.textContent = 'Log In'; }
+    }
+
+    function showDashboard() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').classList.add('active');
+      loadAll();
+    }
+
+    function adminLogout() {
+      localStorage.removeItem('pc_admin_token');
+      adminToken = null;
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('dashboard').classList.remove('active');
+    }
+
+    async function loadAll() {
+      await Promise.all([loadBookings(), loadClients()]);
+    }
+
+    async function loadBookings() {
+      try {
+        const res = await fetch('/api/admin/appointments', {headers:{'Authorization':'Bearer '+adminToken}});
+        if (res.status === 401) { adminLogout(); return; }
+        allBookings = await res.json();
+        updateStats();
+        renderToday();
+        renderBookings('all');
+      } catch { showToast('Could not load bookings', 'error'); }
+    }
+
+    async function loadClients() {
+      try {
+        const res = await fetch('/api/admin/clients', {headers:{'Authorization':'Bearer '+adminToken}});
+        allClients = await res.json();
+        document.getElementById('stat-clients').textContent = allClients.length;
+        renderClients();
+      } catch {}
+    }
+
+    function updateStats() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('stat-total').textContent = allBookings.length;
+      document.getElementById('stat-pending').textContent = allBookings.filter(b=>b.status==='pending').length;
+      document.getElementById('stat-today').textContent = allBookings.filter(b=>b.date===today).length;
+    }
+
+    function statusClass(s) {
+      return {pending:'status-pending',confirmed:'status-confirmed',completed:'status-completed',cancelled:'status-cancelled'}[s]||'status-pending';
+    }
+
+    function bookingCard(b, highlight=false) {
+      return `<div class="booking-card ${highlight?'today':''}">
+        <div class="booking-top">
+          <div>
+            <div class="booking-name">${b.name}</div>
+            <div class="booking-service">${b.service}</div>
+          </div>
+          <span class="status ${statusClass(b.status)}">${b.status}</span>
+        </div>
+        <div class="booking-meta">
+          <span>📅 ${b.date}</span>
+          <span>🕐 ${b.time}</span>
+          ${b.phone ? `<span>📞 ${b.phone}</span>` : ''}
+          ${b.notes ? `<span>📝 ${b.notes}</span>` : ''}
+        </div>
+        <div class="booking-actions">
+          <select onchange="updateStatus(${b.id}, this.value)" style="background:var(--dark-3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:7px 10px;border-radius:8px;font-size:12px;font-family:Inter,sans-serif;">
+            <option value="pending" ${b.status==='pending'?'selected':''}>Pending</option>
+            <option value="confirmed" ${b.status==='confirmed'?'selected':''}>Confirmed</option>
+            <option value="completed" ${b.status==='completed'?'selected':''}>Completed</option>
+            <option value="cancelled" ${b.status==='cancelled'?'selected':''}>Cancelled</option>
+          </select>
+          <button class="btn btn-sm btn-danger" onclick="deleteBooking(${b.id})">Delete</button>
+        </div>
+      </div>`;
+    }
+
+    function renderToday() {
+      const today = new Date().toISOString().split('T')[0];
+      const todayBkgs = allBookings.filter(b => b.date === today);
+      document.getElementById('today-list').innerHTML = todayBkgs.length
+        ? todayBkgs.map(b => bookingCard(b, true)).join('')
+        : `<div class="empty">No appointments scheduled for today.</div>`;
+    }
+
+    function renderBookings(filter) {
+      const filtered = filter === 'all' ? allBookings : allBookings.filter(b => b.status === filter);
+      document.getElementById('bookings-list').innerHTML = filtered.length
+        ? filtered.map(b => bookingCard(b)).join('')
+        : `<div class="empty">No ${filter === 'all' ? '' : filter} bookings found.</div>`;
+    }
+
+    function filterBookings(filter, el) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderBookings(filter);
+    }
+
+    function renderClients() {
+      document.getElementById('clients-list').innerHTML = allClients.length
+        ? allClients.map(c => {
+            const initials = (c.name||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+            return `<div class="client-card">
+              <div class="c-avatar">${initials}</div>
+              <div class="c-info">
+                <div class="name">${c.name}</div>
+                <div class="detail">${c.email}${c.phone ? ' · '+c.phone : ''}</div>
+                <div class="detail" style="margin-top:2px;">Joined ${c.joined ? c.joined.split('T')[0] : '—'}</div>
+              </div>
+            </div>`;
+          }).join('')
+        : `<div class="empty">No clients yet.</div>`;
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        const res = await fetch('/api/admin/appointments/'+id, {
+          method:'PUT', headers:{'Authorization':'Bearer '+adminToken,'Content-Type':'application/json'},
+          body: JSON.stringify({status})
+        });
+        if (res.ok) { showToast('Status updated to ' + status, 'success'); loadBookings(); }
+        else throw new Error();
+      } catch { showToast('Failed to update status', 'error'); }
+    }
+
+    async function deleteBooking(id) {
+      if (!confirm('Delete this appointment permanently?')) return;
+      try {
+        const res = await fetch('/api/admin/appointments/'+id, {
+          method:'DELETE', headers:{'Authorization':'Bearer '+adminToken}
+        });
+        if (res.ok) { showToast('Appointment deleted', 'success'); loadBookings(); }
+        else throw new Error();
+      } catch { showToast('Failed to delete', 'error'); }
+    }
+
+    function switchTab(t) {
+      document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', ['today','bookings','clients'][i]===t));
+      ['today','bookings','clients'].forEach(id => {
+        const el = document.getElementById('tab-'+id);
+        if (el) el.classList.toggle('active', id===t);
+      });
+    }
+  </script>
+</body>
+</html>

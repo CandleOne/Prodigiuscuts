@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
@@ -64,6 +64,16 @@ def token_required(f):
         return f(*args,**kwargs)
     wrapper.__name__ = f.__name__
     return wrapper
+
+@app.route('/')
+def serve_home():
+    return send_from_directory(BASE_DIR, 'index.html')
+
+@app.route('/<path:path>')
+def serve_static_files(path):
+    if path.startswith('api/'):
+        return jsonify({'error': 'Not found'}), 404
+    return send_from_directory(BASE_DIR, path)
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -184,4 +194,4 @@ def update_profile():
     return jsonify({'ok': True})
 
 if __name__=='__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', debug=True, port=5000)

@@ -52,6 +52,11 @@
     .stat-card{background:var(--dark-2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;}
     .stat-card .num{font-family:'Playfair Display',serif;font-size:32px;font-weight:800;color:var(--gold);}
     .stat-card .lbl{color:var(--gray);font-size:13px;margin-top:2px;}
+    .integration-card{background:var(--dark-2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
+    .integration-title{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+    .integration-status{font-size:14px;color:var(--white);}
+    .integration-status.good{color:#50c878;}
+    .integration-status.warn{color:#ffc832;}
 
     /* Tabs */
     .tabs{display:flex;background:var(--dark-2);border-radius:12px;padding:4px;margin-bottom:20px;gap:4px;}
@@ -142,6 +147,11 @@
         <div class="stat-card"><div class="num" id="stat-pending">—</div><div class="lbl">Pending</div></div>
         <div class="stat-card"><div class="num" id="stat-today">—</div><div class="lbl">Today</div></div>
         <div class="stat-card"><div class="num" id="stat-clients">—</div><div class="lbl">Clients</div></div>
+      </div>
+
+      <div class="integration-card">
+        <div class="integration-title">Review Verification Integration</div>
+        <div class="integration-status" id="review-integration-status">Checking configuration...</div>
       </div>
 
       <!-- Tabs -->
@@ -249,7 +259,27 @@
     }
 
     async function loadAll() {
-      await Promise.all([loadStats(), loadBookings(), loadClients(), loadServices()]);
+      await Promise.all([loadStats(), loadBookings(), loadClients(), loadServices(), loadReviewIntegrationStatus()]);
+    }
+
+    async function loadReviewIntegrationStatus() {
+      const statusEl = document.getElementById('review-integration-status');
+      try {
+        const res = await fetch('/api/admin/reviews/status', {headers:{'Authorization':'Bearer '+adminToken}});
+        if (res.status === 401) { adminLogout(); return; }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Status unavailable');
+
+        statusEl.className = 'integration-status ' + (data.configured && data.api_reachable ? 'good' : 'warn');
+        if (data.configured && data.api_reachable) {
+          statusEl.textContent = data.message + ' Sample reviews found: ' + (data.review_count_sample || 0);
+        } else {
+          statusEl.textContent = data.message;
+        }
+      } catch (err) {
+        statusEl.className = 'integration-status warn';
+        statusEl.textContent = err.message || 'Could not check review integration status.';
+      }
     }
 
     async function loadStats() {

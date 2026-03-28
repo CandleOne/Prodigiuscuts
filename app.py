@@ -2,8 +2,11 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
+import json
 import jwt
 import bcrypt
+import urllib.parse
+import urllib.request
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -11,6 +14,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.environ.get('PRODIGIOUS_DB_PATH', os.path.join(BASE_DIR, 'prodigious.db'))
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD','admin123')
 SECRET = os.environ.get('JWT_SECRET','secret-key')
+GOOGLE_PLACES_API_KEY = os.environ.get('GOOGLE_PLACES_API_KEY', '')
+GOOGLE_PLACE_ID = os.environ.get('GOOGLE_PLACE_ID', '')
 
 app = Flask(__name__)
 CORS(app)
@@ -126,6 +131,28 @@ def login():
 def services():
     conn = get_conn(); cur = conn.cursor(); cur.execute('SELECT id,name,price,description FROM services'); rows = [dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
 
+def fetch_google_reviews():
+    if not GOOGLE_PLACES_API_KEY or not GOOGLE_PLACE_ID:
+        return None, 'Google review verification is not configured.'
+
+    params = urllib.parse.urlencode({
+        'place_id': GOOGLE_PLACE_ID,
+        'fields': 'reviews',
+        'key': GOOGLE_PLACES_API_KEY
+    })
+    url = 'https://maps.googleapis.com/maps/api/place/details/json?' + params
+
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+    except Exception:
+        return None, 'Could not reach Google reviews right now.'
+
+    if payload.get('status') != 'OK':
+        return None, 'Google review verification is temporarily unavailable.'
+
+    return payload.get('result', {}).get('reviews', []), None
+
 def calculate_coupon_discount(raw_code, service_price):
     code = (raw_code or '').strip().upper()
     if not code:
@@ -165,6 +192,34 @@ def validate_coupon():
         'discount_amount': discount_amount,
         'service_price': int(service_row['price']),
         'final_price': final_price
+    })
+
+@app.route('/api/reviews/verify', methods=['POST'])
+@token_required
+def verify_review_for_coupon():
+    data = request.json or {}
+    reviewer_name = (data.get('reviewer_name') or '').strip().lower()
+    text_hint = (data.get('text_hint') or '').strip().lower()
+
+    if not reviewer_name:
+        return jsonify({'verified': False, 'error': 'Enter the name used on your Google review.'}), 400
+
+    reviews, fetch_error = fetch_google_reviews()
+    if fetch_error:
+        return jsonify({'verified': False, 'error': fetch_error}), 503
+
+    for review in reviews:
+        author_name = (review.get('author_name') or '').strip().lower()
+        review_text = (review.get('text') or '').strip().lower()
+        name_match = reviewer_name in author_name or author_name in reviewer_name
+        text_match = True if not text_hint else text_hint in review_text
+        if name_match and text_match:
+            code, amount = calculate_coupon_discount('PCUTS5', 9999)
+            return jsonify({'verified': True, 'coupon_code': code, 'discount_amount': amount})
+
+    return jsonify({
+        'verified': False,
+        'error': 'We could not verify that review yet. Google reviews can take a few minutes to appear. Try again shortly.'
     })
 
 @app.route('/api/book', methods=['POST'])
@@ -259,6 +314,32 @@ def admin_stats():
         'pending_bookings': pending,
         'today_bookings': today_count,
         'clients': clients
+    })
+
+@app.route('/api/admin/reviews/status', methods=['GET'])
+@admin_required
+def admin_reviews_status():
+    configured = bool(GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID)
+    if not configured:
+        return jsonify({
+            'configured': False,
+            'api_reachable': False,
+            'message': 'Missing GOOGLE_PLACES_API_KEY or GOOGLE_PLACE_ID.'
+        })
+
+    reviews, error = fetch_google_reviews()
+    if error:
+        return jsonify({
+            'configured': True,
+            'api_reachable': False,
+            'message': error
+        })
+
+    return jsonify({
+        'configured': True,
+        'api_reachable': True,
+        'message': 'Google review verification is connected.',
+        'review_count_sample': len(reviews)
     })
 
 @app.route('/api/admin/services', methods=['GET', 'POST'])

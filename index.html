@@ -1122,14 +1122,19 @@
       return Boolean(localStorage.getItem('pc_token') && localStorage.getItem('pc_user'));
     }
 
-    function showLoginNudgeThenOpen(serviceName) {
+    function showLoginNudgeThenRedirect(serviceName) {
       if (loginNudgeTimer) {
         window.clearTimeout(loginNudgeTimer);
       }
       loginNudge.classList.add('open');
       loginNudgeTimer = window.setTimeout(function() {
         loginNudge.classList.remove('open');
-        openBookingModal(serviceName);
+        var redirectTarget = 'book.html';
+        if (serviceName) {
+          redirectTarget += '?service=' + encodeURIComponent(serviceName);
+        }
+        sessionStorage.setItem('pc_redirect', redirectTarget);
+        window.location.href = 'login.html#register';
       }, 1300);
     }
 
@@ -1139,7 +1144,7 @@
         if (userIsLoggedIn()) {
           openBookingModal(serviceName);
         } else {
-          showLoginNudgeThenOpen(serviceName);
+          showLoginNudgeThenRedirect(serviceName);
         }
       });
       card.addEventListener('keydown', function(event) {
@@ -1148,7 +1153,7 @@
           if (userIsLoggedIn()) {
             openBookingModal(serviceName);
           } else {
-            showLoginNudgeThenOpen(serviceName);
+            showLoginNudgeThenRedirect(serviceName);
           }
         }
       });

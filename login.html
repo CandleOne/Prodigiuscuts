@@ -135,6 +135,12 @@
       b.textContent = loading ? 'Please wait...' : (btnId==='login-btn' ? 'Log In' : 'Create Account');
     }
 
+    function consumeRedirectTarget(fallbackTarget) {
+      const target = sessionStorage.getItem('pc_redirect') || fallbackTarget;
+      sessionStorage.removeItem('pc_redirect');
+      return target;
+    }
+
     async function doLogin(e) {
       e.preventDefault();
       setLoading('login-btn', true);
@@ -148,7 +154,7 @@
         localStorage.setItem('pc_token', data.token);
         localStorage.setItem('pc_user', JSON.stringify(data.user));
         showToast('Logged in! Redirecting...', 'success');
-        setTimeout(() => { window.location = sessionStorage.getItem('pc_redirect') || 'account.html'; }, 900);
+        setTimeout(() => { window.location = consumeRedirectTarget('account.html'); }, 900);
       } catch(err) { showToast(err.message, 'error'); }
       finally { setLoading('login-btn', false); }
     }
@@ -184,7 +190,7 @@
         localStorage.setItem('pc_token', loginData.token);
         localStorage.setItem('pc_user', JSON.stringify(loginData.user));
         showToast('Account created! Redirecting...', 'success');
-        setTimeout(() => { window.location = 'book.html'; }, 900);
+        setTimeout(() => { window.location = consumeRedirectTarget('book.html'); }, 900);
       } catch(err) { showToast(err.message, 'error'); }
       finally { setLoading('register-btn', false); }
     }

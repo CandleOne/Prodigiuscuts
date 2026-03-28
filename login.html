@@ -114,6 +114,22 @@
   <div class="toast" id="toast"></div>
 
   <script>
+    function getStoredUser() {
+      try {
+        return JSON.parse(localStorage.getItem('pc_user') || 'null');
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function alreadyLoggedIn() {
+      return Boolean(localStorage.getItem('pc_token') && getStoredUser());
+    }
+
+    if (alreadyLoggedIn()) {
+      window.location = sessionStorage.getItem('pc_redirect') || 'account.html';
+    }
+
     // Switch to register tab if hash is #register
     if (window.location.hash === '#register') switchTab('register');
 

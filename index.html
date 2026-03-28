@@ -687,8 +687,14 @@
 
         <!-- Right: account options -->
         <div class="header-right">
-          <a href="login.html" class="btn btn-outline">Log In</a>
-          <a href="login.html#register" class="btn btn-primary">Sign Up</a>
+          <div id="auth-links-logged-out" style="display:flex;gap:12px;">
+            <a href="login.html" class="btn btn-outline">Log In</a>
+            <a href="login.html#register" class="btn btn-primary">Sign Up</a>
+          </div>
+          <div id="auth-links-logged-in" style="display:none;gap:12px;">
+            <a href="account.html" class="btn btn-outline">My Account</a>
+            <button type="button" class="btn btn-primary" id="logout-btn">Log Out</button>
+          </div>
         </div>
       </div>
     </div>
@@ -703,9 +709,13 @@
     <a href="#reviews" onclick="closeMobileNav()">Reviews</a>
     <a href="#contact" onclick="closeMobileNav()">Contact</a>
             <a href="book.html" class="btn btn-primary" onclick="closeMobileNav()" style="margin-top:12px;">Book Now</a>
-    <div style="display:flex;gap:12px;margin-top:8px;">
-      <a href="login.html" onclick="closeMobileNav()" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Log In</a>
-      <a href="login.html#register" onclick="closeMobileNav()" class="btn btn-primary" style="font-size:14px;padding:10px 24px;">Sign Up</a>
+            <div id="mobile-auth-logged-out" style="display:flex;gap:12px;margin-top:8px;">
+              <a href="login.html" onclick="closeMobileNav()" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Log In</a>
+              <a href="login.html#register" onclick="closeMobileNav()" class="btn btn-primary" style="font-size:14px;padding:10px 24px;">Sign Up</a>
+            </div>
+            <div id="mobile-auth-logged-in" style="display:none;gap:12px;margin-top:8px;">
+              <a href="account.html" onclick="closeMobileNav()" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">My Account</a>
+              <button type="button" onclick="handleLogout()" class="btn btn-primary" style="font-size:14px;padding:10px 24px;">Log Out</button>
     </div>
   </nav>
 
@@ -1073,6 +1083,57 @@
   </footer>
 
   <script>
+    var desktopAuthLoggedOut = document.getElementById('auth-links-logged-out');
+    var desktopAuthLoggedIn = document.getElementById('auth-links-logged-in');
+    var mobileAuthLoggedOut = document.getElementById('mobile-auth-logged-out');
+    var mobileAuthLoggedIn = document.getElementById('mobile-auth-logged-in');
+    var logoutBtn = document.getElementById('logout-btn');
+
+    function getStoredUser() {
+      try {
+        return JSON.parse(localStorage.getItem('pc_user') || 'null');
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function hasSession() {
+      return Boolean(localStorage.getItem('pc_token') && getStoredUser());
+    }
+
+    function applyNavAuthState() {
+      var loggedIn = hasSession();
+      if (desktopAuthLoggedOut) {
+        desktopAuthLoggedOut.style.display = loggedIn ? 'none' : 'flex';
+      }
+      if (desktopAuthLoggedIn) {
+        desktopAuthLoggedIn.style.display = loggedIn ? 'flex' : 'none';
+      }
+      if (mobileAuthLoggedOut) {
+        mobileAuthLoggedOut.style.display = loggedIn ? 'none' : 'flex';
+      }
+      if (mobileAuthLoggedIn) {
+        mobileAuthLoggedIn.style.display = loggedIn ? 'flex' : 'none';
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('pc_token');
+      localStorage.removeItem('pc_user');
+      applyNavAuthState();
+      closeMobileNav();
+      closeBookingModal();
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', handleLogout);
+    }
+    window.addEventListener('storage', function(event) {
+      if (event.key === 'pc_token' || event.key === 'pc_user') {
+        applyNavAuthState();
+      }
+    });
+
     var mobileNav = document.getElementById('mobile-nav');
     document.getElementById('menu-toggle').addEventListener('click', function() { mobileNav.classList.add('open'); });
     document.getElementById('mobile-nav-close').addEventListener('click', closeMobileNav);
@@ -1119,7 +1180,7 @@
     }
 
     function userIsLoggedIn() {
-      return Boolean(localStorage.getItem('pc_token') && localStorage.getItem('pc_user'));
+      return hasSession();
     }
 
     function showLoginNudgeThenRedirect(serviceName) {
@@ -1170,6 +1231,8 @@
         closeBookingModal();
       }
     });
+
+    applyNavAuthState();
 
   </script>
 </body>

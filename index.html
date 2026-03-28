@@ -69,7 +69,7 @@
       align-items: center;
     }
     .header-left { display: flex; align-items: center; gap: 8px; }
-    .header-center { display: flex; justify-content: center; }
+    .header-center { display: none; }
     .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
     .logo-img {
       height: 56px;
@@ -113,6 +113,17 @@
         radial-gradient(ellipse at 80% 20%, rgba(200,169,110,0.05) 0%, transparent 50%);
     }
     .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+    .hero-logo-wrap {
+      margin-bottom: 20px;
+      padding-top: 24px;
+    }
+    .hero-logo {
+      width: min(100%, 380px);
+      height: auto;
+      display: block;
+      object-fit: contain;
+      filter: drop-shadow(0 16px 32px rgba(0,0,0,0.32));
+    }
     .hero-content h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.08; margin-bottom: 20px; }
     .hero-content h1 em { font-style: normal; color: var(--gold); }
     .hero-content p { color: var(--gray); font-size: 17px; line-height: 1.7; margin-bottom: 32px; max-width: 440px; }
@@ -297,10 +308,11 @@
       .nav-links { display: none; }
       .header-right { display: none; }
       .menu-toggle { display: flex; }
-      .header-inner { grid-template-columns: auto 1fr auto; }
-      .header-center { justify-content: center; }
+      .header-inner { grid-template-columns: 1fr auto; }
       .hero { padding: 100px 0 60px; min-height: auto; }
       .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+      .hero-logo-wrap { padding-top: 8px; }
+      .hero-logo { margin: 0 auto; width: min(100%, 320px); }
       .hero-content p { margin-left: auto; margin-right: auto; }
       .hero-buttons { justify-content: center; }
       .hero-stats { justify-content: center; }
@@ -371,6 +383,9 @@
     <div class="container">
       <div class="hero-grid">
         <div class="hero-content fade-in">
+          <div class="hero-logo-wrap">
+            <img src="logo.png" alt="Prodigious Cuts" class="hero-logo">
+          </div>
           <div class="section-tag">Premium Barbershop · Livingston, AL</div>
           <h1>Where <em>Precision</em> Meets Style</h1>
           <p>Fresh fades, clean lineups, beard work, kids cuts, and more — crafted by skilled barbers who take pride in every detail. Walk-ins welcome, appointments preferred.</p>

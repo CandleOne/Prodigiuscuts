@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Appointment — Prodigious Cuts</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="booking-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dayschedule-widget@latest/dist/dayschedule-widget.min.js" defer></script>
   <style>
     :root{--gold:#C8A96E;--gold-light:#E2CA9E;--dark:#0D0D0D;--dark-2:#1A1A1A;--dark-3:#252525;--white:#FAFAFA;--gray:#999;--radius:12px;}
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -29,27 +27,73 @@
     .booking-points{display:grid;gap:12px;margin-bottom:24px;}
     .booking-points div{display:flex;gap:10px;align-items:flex-start;color:var(--white);font-size:14px;}
     .booking-points span:first-child{color:var(--gold);}
-    .booking-actions{display:flex;flex-wrap:wrap;gap:12px;}
+    .booking-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
     .booking-actions .btn{width:auto;padding:14px 22px;}
-    .widget-card{background:rgba(26,26,26,0.88);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:18px;box-shadow:0 24px 60px rgba(0,0,0,0.26);min-height:760px;position:relative;z-index:1;}
-    .widget-card dayschedule-widget{display:block;min-height:720px;}
-    .booking-fallback{display:none;background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.24);border-radius:18px;padding:18px;margin-top:16px;color:var(--white);}
-    .booking-fallback.show{display:block;}
+    .helper-text{font-size:13px;color:var(--gray);line-height:1.5;}
+    .widget-card{background:rgba(26,26,26,0.88);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,0.26);min-height:760px;position:relative;z-index:1;}
+
+    .card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;}
+    .card-header h2{font-family:'Playfair Display',serif;font-size:32px;line-height:1.1;}
+    .card-header p{color:var(--gray);font-size:14px;}
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.full{grid-column:1/-1;}
+    .form-group label{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray);}
+    .form-group input,
+    .form-group select,
+    .form-group textarea{
+      background:var(--dark-3);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:var(--radius);
+      color:var(--white);
+      padding:13px 14px;
+      font-size:14px;
+      font-family:'Inter',sans-serif;
+      outline:none;
+      transition:border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus{border-color:var(--gold);}
+    .form-group textarea{min-height:100px;resize:vertical;}
+
+    .slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+    .slot-btn{
+      border:1px solid rgba(255,255,255,0.14);
+      background:transparent;
+      color:var(--white);
+      padding:10px 8px;
+      border-radius:10px;
+      font-size:13px;
+      cursor:pointer;
+      transition:all 0.2s;
+    }
+    .slot-btn:hover{border-color:rgba(200,169,110,0.6);color:var(--gold);}
+    .slot-btn.active{background:rgba(200,169,110,0.14);border-color:var(--gold);color:var(--gold);}
+
+    .status-msg{display:none;padding:12px 14px;border-radius:10px;font-size:14px;margin-top:14px;}
+    .status-msg.show{display:block;}
+    .status-msg.error{background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.28);color:#ff8d8d;}
+    .status-msg.success{background:rgba(200,169,110,0.12);border:1px solid rgba(200,169,110,0.34);color:var(--gold);}
 
     .btn{padding:14px 28px;border-radius:var(--radius);font-weight:600;font-size:15px;border:none;cursor:pointer;transition:all 0.3s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
     .btn-primary{background:var(--gold);color:var(--dark);}
     .btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);}
     .btn-outline{background:transparent;color:var(--gray);border:2px solid rgba(255,255,255,0.1);}
     .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+    .btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
     @media (max-width: 900px){
       .booking-shell{grid-template-columns:1fr;}
       .widget-card{min-height:680px;}
-      .widget-card dayschedule-widget{min-height:640px;}
+      .slots{grid-template-columns:repeat(3,minmax(0,1fr));}
     }
     @media (max-width: 640px){
       .page{padding:92px 16px 40px;}
       .booking-panel,.widget-card{padding:18px;}
       .booking-actions .btn{width:100%;}
+      .form-grid{grid-template-columns:1fr;}
+      .slots{grid-template-columns:repeat(2,minmax(0,1fr));}
     }
   </style>
 </head>
@@ -67,24 +111,65 @@
       <aside class="booking-panel">
         <img src="logo.png" alt="Prodigious Cuts">
         <div class="eyebrow">Online Booking</div>
-        <h1>Book your next cut in a few clicks.</h1>
-        <p>Use the live DaySchedule calendar to choose your service, pick a time, and lock in your appointment without waiting for a call back.</p>
+        <h1>Book directly with Prodigious Cuts.</h1>
+        <p>Choose your service, day, and time. Your request is sent to our own appointment system and appears in your account right away.</p>
         <div class="booking-points">
           <div><span>•</span><span>Appointments preferred, walk-ins still welcome.</span></div>
           <div><span>•</span><span>Tuesday is appointment only, Wednesday through Saturday runs 8AM to 6PM.</span></div>
-          <div><span>•</span><span>Switch to your real DaySchedule link in booking-config.js when your booking page is ready.</span></div>
+          <div><span>•</span><span>You must be logged in to submit an appointment request.</span></div>
         </div>
         <div class="booking-actions">
           <a href="tel:+12053019662" class="btn btn-primary">Call the Shop</a>
           <a href="index.html" class="btn btn-outline">Back Home</a>
+          <a href="login.html" class="btn btn-outline" id="login-cta">Log In to Book</a>
         </div>
-        <div class="booking-fallback" id="booking-fallback">
-          Add your real DaySchedule booking URL in booking-config.js to replace the demo scheduler on this page.
-        </div>
+        <p class="helper-text" style="margin-top:16px;">Closed Sunday and Monday. For urgent same-day availability, call (205) 301-9662.</p>
       </aside>
 
       <section class="widget-card">
-        <dayschedule-widget id="booking-widget"></dayschedule-widget>
+        <div class="card-header">
+          <div>
+            <h2>Schedule Appointment</h2>
+            <p id="welcome-line">Fill out the form below to request your slot.</p>
+          </div>
+        </div>
+
+        <form id="booking-form">
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="service">Service</label>
+              <select id="service" required>
+                <option value="">Loading services...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="date">Date</label>
+              <input type="date" id="date" required>
+            </div>
+
+            <div class="form-group">
+              <label for="time">Time</label>
+              <input type="text" id="time" placeholder="Select a slot below" readonly required>
+            </div>
+
+            <div class="form-group full">
+              <label>Available Time Slots</label>
+              <div class="slots" id="time-slots"></div>
+            </div>
+
+            <div class="form-group full">
+              <label for="notes">Notes (Optional)</label>
+              <textarea id="notes" placeholder="Any style requests or details for your barber?"></textarea>
+            </div>
+
+            <div class="form-group full">
+              <button type="submit" class="btn btn-primary" id="submit-btn" style="width:100%;">Book Appointment</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="status-msg" id="status-msg"></div>
       </section>
     </div>
   </div>
@@ -92,29 +177,204 @@
   <script>
     const token = localStorage.getItem('pc_token');
     const user = JSON.parse(localStorage.getItem('pc_user') || 'null');
-    const bookingConfig = window.PRODIGIOUS_BOOKING || {};
-    const bookingWidget = document.getElementById('booking-widget');
-    const bookingFallback = document.getElementById('booking-fallback');
+    const serviceEl = document.getElementById('service');
+    const dateEl = document.getElementById('date');
+    const timeEl = document.getElementById('time');
+    const notesEl = document.getElementById('notes');
+    const slotsEl = document.getElementById('time-slots');
+    const submitBtn = document.getElementById('submit-btn');
+    const statusMsg = document.getElementById('status-msg');
+    const loginCta = document.getElementById('login-cta');
+    const bookingForm = document.getElementById('booking-form');
 
     if (token && user) {
       document.getElementById('acct-link').style.display = 'flex';
       document.getElementById('login-link').style.display = 'none';
-    }
-    const colorOptions = bookingConfig.color || {
-      primary: '#C8A96E',
-      secondary: '#FAFAFA',
-      mode: 'dark'
-    };
-
-    if (bookingConfig.dayScheduleUrl) {
-      bookingWidget.setAttribute('url', bookingConfig.dayScheduleUrl);
-      bookingWidget.setAttribute('options', JSON.stringify({
-        color: colorOptions,
-        hideHeader: true
-      }));
+      loginCta.style.display = 'none';
+      document.getElementById('welcome-line').textContent = 'Booking as ' + user.name + ' (' + user.email + ')';
     } else {
-      bookingWidget.style.display = 'none';
-      bookingFallback.classList.add('show');
+      sessionStorage.setItem('pc_redirect', 'book.html');
+      submitBtn.disabled = true;
+      showStatus('Please log in to submit an appointment request.', 'error');
+    }
+
+    function showStatus(message, type) {
+      statusMsg.textContent = message;
+      statusMsg.className = 'status-msg show ' + type;
+    }
+
+    function clearStatus() {
+      statusMsg.className = 'status-msg';
+      statusMsg.textContent = '';
+    }
+
+    function formatDateForInput(date) {
+      var year = date.getFullYear();
+      var month = String(date.getMonth() + 1).padStart(2, '0');
+      var day = String(date.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
+    function setDefaultDate() {
+      var now = new Date();
+      var minDate = formatDateForInput(now);
+      dateEl.min = minDate;
+      dateEl.value = minDate;
+    }
+
+    function getSlotsForDay(dayIndex) {
+      if (dayIndex === 0 || dayIndex === 1) {
+        return [];
+      }
+
+      var slots = [];
+      for (var hour = 8; hour <= 17; hour += 1) {
+        slots.push(String(hour).padStart(2, '0') + ':00');
+        slots.push(String(hour).padStart(2, '0') + ':30');
+      }
+      slots.push('18:00');
+      return slots;
+    }
+
+    function renderSlots() {
+      slotsEl.innerHTML = '';
+      timeEl.value = '';
+
+      if (!dateEl.value) {
+        return;
+      }
+
+      var selectedDate = new Date(dateEl.value + 'T12:00:00');
+      var slots = getSlotsForDay(selectedDate.getDay());
+
+      if (!slots.length) {
+        var closedMsg = document.createElement('div');
+        closedMsg.className = 'helper-text';
+        closedMsg.textContent = 'Closed on the selected day. Pick Tuesday through Saturday.';
+        slotsEl.appendChild(closedMsg);
+        return;
+      }
+
+      slots.forEach(function(slot) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'slot-btn';
+        button.textContent = slot;
+        button.addEventListener('click', function() {
+          document.querySelectorAll('.slot-btn').forEach(function(btn) { btn.classList.remove('active'); });
+          button.classList.add('active');
+          timeEl.value = slot;
+        });
+        slotsEl.appendChild(button);
+      });
+    }
+
+    async function loadServices() {
+      try {
+        var response = await fetch('/api/services');
+        var services = await response.json();
+
+        if (!response.ok || !Array.isArray(services) || !services.length) {
+          throw new Error('Could not load services.');
+        }
+
+        serviceEl.innerHTML = '<option value="">Select a service</option>';
+        services.forEach(function(item) {
+          var option = document.createElement('option');
+          option.value = item.name;
+          option.textContent = item.name + ' - $' + item.price;
+          serviceEl.appendChild(option);
+        });
+      } catch (error) {
+        var fallback = [
+          { name: "Men's Haircut", price: 30 },
+          { name: "Men's Beard & Taper", price: 20 },
+          { name: "Women's Haircut", price: 20 },
+          { name: "Women's Cut + Design", price: 25 },
+          { name: 'Kids Cut', price: 15 },
+          { name: 'Teen Cut', price: 20 }
+        ];
+        serviceEl.innerHTML = '<option value="">Select a service</option>';
+        fallback.forEach(function(item) {
+          var option = document.createElement('option');
+          option.value = item.name;
+          option.textContent = item.name + ' - $' + item.price;
+          serviceEl.appendChild(option);
+        });
+      }
+    }
+
+    bookingForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      clearStatus();
+
+      if (!token || !user) {
+        showStatus('Please log in before booking.', 'error');
+        return;
+      }
+
+      if (!serviceEl.value || !dateEl.value || !timeEl.value) {
+        showStatus('Please select a service, date, and time.', 'error');
+        return;
+      }
+
+      var chosenDate = new Date(dateEl.value + 'T12:00:00');
+      if (chosenDate.getDay() === 0 || chosenDate.getDay() === 1) {
+        showStatus('Bookings are closed on Sunday and Monday.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Booking...';
+
+      try {
+        var response = await fetch('/api/book', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({
+            name: user.name,
+            service: serviceEl.value,
+            date: dateEl.value,
+            time: timeEl.value,
+            notes: notesEl.value.trim()
+          })
+        });
+
+        var data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Could not create appointment.');
+        }
+
+        showStatus('Appointment requested successfully. Check your account for status updates.', 'success');
+        bookingForm.reset();
+        setDefaultDate();
+        renderSlots();
+      } catch (error) {
+        showStatus(error.message || 'Booking failed. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = !token || !user;
+        submitBtn.textContent = 'Book Appointment';
+      }
+    });
+
+    dateEl.addEventListener('change', function() {
+      clearStatus();
+      renderSlots();
+    });
+
+    setDefaultDate();
+    renderSlots();
+    loadServices();
+
+    if (!token || !user) {
+      serviceEl.disabled = true;
+      dateEl.disabled = true;
+      timeEl.disabled = true;
+      notesEl.disabled = true;
+      slotsEl.style.opacity = '0.45';
     }
   </script>
 </body>

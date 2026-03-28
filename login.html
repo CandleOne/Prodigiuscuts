@@ -158,21 +158,31 @@
       if (document.getElementById('r-pass').value !== document.getElementById('r-pass2').value) {
         return showToast('Passwords do not match', 'error');
       }
+      const email = document.getElementById('r-email').value;
+      const password = document.getElementById('r-pass').value;
       setLoading('register-btn', true);
       try {
         const res = await fetch('/api/register', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             name: document.getElementById('r-name').value,
-            email: document.getElementById('r-email').value,
+            email,
             phone: document.getElementById('r-phone').value,
-            password: document.getElementById('r-pass').value
+            password
           })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Registration failed');
-        localStorage.setItem('pc_token', data.token);
-        localStorage.setItem('pc_user', JSON.stringify(data.user));
+
+        const loginRes = await fetch('/api/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email, password })
+        });
+        const loginData = await loginRes.json();
+        if (!loginRes.ok) throw new Error(loginData.error || 'Login failed after registration');
+
+        localStorage.setItem('pc_token', loginData.token);
+        localStorage.setItem('pc_user', JSON.stringify(loginData.user));
         showToast('Account created! Redirecting...', 'success');
         setTimeout(() => { window.location = 'book.html'; }, 900);
       } catch(err) { showToast(err.message, 'error'); }

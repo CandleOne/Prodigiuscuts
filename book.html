@@ -135,6 +135,74 @@
       line-height:1.7;
       margin-bottom:16px;
     }
+    .booking-review-modal{
+      position:fixed;
+      inset:0;
+      z-index:230;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .booking-review-modal.show{display:flex;}
+    .booking-review-backdrop{
+      position:absolute;
+      inset:0;
+      background:rgba(6,6,6,0.62);
+      backdrop-filter:blur(3px);
+      -webkit-backdrop-filter:blur(3px);
+    }
+    .booking-review-dialog{
+      position:relative;
+      z-index:1;
+      width:min(560px,100%);
+      border-radius:18px;
+      border:1px solid rgba(200,169,110,0.34);
+      background:linear-gradient(180deg,rgba(26,26,26,0.98),rgba(13,13,13,0.98));
+      box-shadow:0 24px 60px rgba(0,0,0,0.34);
+      padding:22px 20px;
+      text-align:center;
+    }
+    .booking-review-dialog h3{
+      font-family:'Playfair Display',serif;
+      font-size:30px;
+      margin-bottom:8px;
+      color:var(--gold-light);
+    }
+    .booking-review-dialog p{
+      color:var(--white);
+      font-size:15px;
+      line-height:1.7;
+      margin-bottom:14px;
+    }
+    .review-actions{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .coupon-box{
+      margin-top:16px;
+      border:1px dashed rgba(200,169,110,0.6);
+      border-radius:12px;
+      padding:12px;
+      background:rgba(200,169,110,0.08);
+      display:none;
+    }
+    .coupon-box.show{display:block;}
+    .coupon-code{
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:0.08em;
+      color:var(--gold-light);
+      margin-bottom:4px;
+    }
+    .coupon-help{
+      font-size:13px;
+      color:var(--gray);
+      margin-bottom:10px;
+    }
 
     .btn{padding:14px 28px;border-radius:var(--radius);font-weight:600;font-size:15px;border:none;cursor:pointer;transition:all 0.3s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
     .btn-primary{background:var(--gold);color:var(--dark);}
@@ -307,6 +375,23 @@
             <button type="button" class="btn btn-primary" id="booking-confirm-ok">Got it</button>
           </div>
         </div>
+
+        <div class="booking-review-modal" id="booking-review-modal" aria-hidden="true">
+          <div class="booking-review-backdrop" id="booking-review-backdrop"></div>
+          <div class="booking-review-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-review-title">
+            <h3 id="booking-review-title">Give Us A Review</h3>
+            <p>Give us a review for $5 off your next appointment.</p>
+            <div class="review-actions">
+              <button type="button" class="btn btn-primary" id="review-link-btn">Leave Review</button>
+              <button type="button" class="btn btn-outline" id="review-confirm-btn">I Left A Review</button>
+            </div>
+            <div class="coupon-box" id="coupon-box">
+              <div class="coupon-code" id="coupon-code">PCUTS5</div>
+              <div class="coupon-help">Show this coupon code at your next appointment for $5 off.</div>
+              <button type="button" class="btn btn-primary" id="coupon-done-btn">Done</button>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   </div>
@@ -336,15 +421,36 @@
     const confirmModal = document.getElementById('booking-confirm-modal');
     const confirmBackdrop = document.getElementById('booking-confirm-backdrop');
     const confirmOk = document.getElementById('booking-confirm-ok');
+    const reviewModal = document.getElementById('booking-review-modal');
+    const reviewBackdrop = document.getElementById('booking-review-backdrop');
+    const reviewLinkBtn = document.getElementById('review-link-btn');
+    const reviewConfirmBtn = document.getElementById('review-confirm-btn');
+    const couponBox = document.getElementById('coupon-box');
+    const couponDoneBtn = document.getElementById('coupon-done-btn');
+    const REVIEW_URL = 'https://www.google.com/search?sca_esv=a02f3e9b87f4a5a7&rlz=1C1FHFK_enUS1137US1137&sxsrf=ANbL-n7lY1E7C_LhRpU-bZYLuf7_Ve5_0g:1774708898234&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOcWkmTXUWoTok53UDEVKn1qCayY76QekHMGn3EEzewujJjvo5fssmiqr7qMLG83R8ga5jFUG3ivrcYcODX2JcJXxyYL9&q=Prodigious+cuts+Reviews&sa=X&ved=2ahUKEwjM29Xr6cKTAxUlGtAFHWuaLcIQ0bkNegQIIBAF&biw=767&bih=778&dpr=1.25';
 
     function showConfirmModal() {
       confirmModal.classList.add('show');
       confirmModal.setAttribute('aria-hidden', 'false');
     }
 
-    function hideConfirmModal() {
+    function hideConfirmModal(showReview) {
       confirmModal.classList.remove('show');
       confirmModal.setAttribute('aria-hidden', 'true');
+      if (showReview !== false) {
+        showReviewModal();
+      }
+    }
+
+    function showReviewModal() {
+      couponBox.classList.remove('show');
+      reviewModal.classList.add('show');
+      reviewModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideReviewModal() {
+      reviewModal.classList.remove('show');
+      reviewModal.setAttribute('aria-hidden', 'true');
     }
 
     function applyModalEmbedMode() {
@@ -685,11 +791,22 @@
 
     authLoginForm.addEventListener('submit', doInlineLogin);
     authRegisterForm.addEventListener('submit', doInlineRegister);
-    confirmOk.addEventListener('click', hideConfirmModal);
-    confirmBackdrop.addEventListener('click', hideConfirmModal);
+    confirmOk.addEventListener('click', function() { hideConfirmModal(true); });
+    confirmBackdrop.addEventListener('click', function() { hideConfirmModal(true); });
+    reviewBackdrop.addEventListener('click', hideReviewModal);
+    reviewLinkBtn.addEventListener('click', function() {
+      window.open(REVIEW_URL, '_blank', 'noopener,noreferrer');
+    });
+    reviewConfirmBtn.addEventListener('click', function() {
+      couponBox.classList.add('show');
+    });
+    couponDoneBtn.addEventListener('click', hideReviewModal);
     document.addEventListener('keydown', function(event) {
       if (event.key === 'Escape' && confirmModal.classList.contains('show')) {
-        hideConfirmModal();
+        hideConfirmModal(true);
+      }
+      if (event.key === 'Escape' && reviewModal.classList.contains('show')) {
+        hideReviewModal();
       }
     });
 

@@ -229,28 +229,6 @@
       color:var(--gray);
       text-align:center;
     }
-    .review-verify{
-      margin-top:14px;
-      text-align:left;
-      display:grid;
-      gap:8px;
-    }
-    .review-verify label{
-      font-size:12px;
-      font-weight:700;
-      letter-spacing:1px;
-      text-transform:uppercase;
-      color:var(--gray);
-    }
-    .review-verify input{
-      width:100%;
-      background:var(--dark-3);
-      border:1px solid rgba(255,255,255,0.1);
-      border-radius:10px;
-      color:var(--white);
-      padding:11px 12px;
-      font-size:14px;
-    }
     .review-verify-feedback{
       margin-top:8px;
       font-size:13px;
@@ -554,12 +532,6 @@
               <button type="button" class="btn btn-outline" id="review-confirm-btn">Verify Review</button>
             </div>
             <p class="review-live-note">Full review verification ll be integrated on live site. Missing authenntication details.</p>
-            <div class="review-verify">
-              <label for="reviewer-name">Name On Google Review</label>
-              <input type="text" id="reviewer-name" placeholder="Enter the name shown on your Google review">
-              <label for="review-text-hint">Optional Word From Your Review</label>
-              <input type="text" id="review-text-hint" placeholder="Example: clean fade">
-            </div>
             <div class="review-verify-feedback" id="review-verify-feedback"></div>
             <div class="coupon-box" id="coupon-box">
               <div class="coupon-code" id="coupon-code">PCUTS5</div>
@@ -601,8 +573,6 @@
     const reviewBackdrop = document.getElementById('booking-review-backdrop');
     const reviewLinkBtn = document.getElementById('review-link-btn');
     const reviewConfirmBtn = document.getElementById('review-confirm-btn');
-    const reviewerNameEl = document.getElementById('reviewer-name');
-    const reviewTextHintEl = document.getElementById('review-text-hint');
     const reviewVerifyFeedback = document.getElementById('review-verify-feedback');
     const couponBox = document.getElementById('coupon-box');
     const couponDoneBtn = document.getElementById('coupon-done-btn');
@@ -1062,44 +1032,13 @@
     reviewLinkBtn.addEventListener('click', function() {
       window.open(REVIEW_URL, '_blank', 'noopener,noreferrer');
     });
-    reviewConfirmBtn.addEventListener('click', async function() {
-      var reviewerName = reviewerNameEl.value.trim();
-      var textHint = reviewTextHintEl.value.trim();
-      if (!reviewerName) {
-        reviewVerifyFeedback.className = 'review-verify-feedback';
-        reviewVerifyFeedback.textContent = 'Enter the name used on your Google review.';
-        return;
-      }
-
-      reviewConfirmBtn.disabled = true;
-      reviewConfirmBtn.textContent = 'Verifying...';
-      try {
-        var response = await fetch('/api/reviews/verify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ reviewer_name: reviewerName, text_hint: textHint })
-        });
-        var data = await response.json();
-        if (!response.ok || !data.verified) {
-          throw new Error(data.error || 'We could not verify your review yet.');
-        }
-
-        couponBox.classList.add('show');
-        couponCodeEl.value = data.coupon_code || 'PCUTS5';
-        couponFeedback.className = 'coupon-feedback';
-        couponFeedback.textContent = 'Coupon ready. Tap Apply Coupon to use it.';
-        reviewVerifyFeedback.className = 'review-verify-feedback success';
-        reviewVerifyFeedback.textContent = 'Review verified. Coupon unlocked.';
-      } catch (error) {
-        reviewVerifyFeedback.className = 'review-verify-feedback';
-        reviewVerifyFeedback.textContent = error.message || 'Verification failed. Please try again.';
-      } finally {
-        reviewConfirmBtn.disabled = false;
-        reviewConfirmBtn.textContent = 'Verify Review';
-      }
+    reviewConfirmBtn.addEventListener('click', function() {
+      couponBox.classList.add('show');
+      couponCodeEl.value = 'PCUTS5';
+      couponFeedback.className = 'coupon-feedback';
+      couponFeedback.textContent = 'Coupon ready. Tap Apply Coupon to use it.';
+      reviewVerifyFeedback.className = 'review-verify-feedback success';
+      reviewVerifyFeedback.textContent = 'Coupon unlocked for this booking.';
     });
     couponDoneBtn.addEventListener('click', hideReviewModal);
     applyCouponBtn.addEventListener('click', applyCouponCode);

@@ -597,6 +597,7 @@
         }
 
         showStatus('Appointment requested successfully. Check your account for status updates.', 'success');
+        window.alert('Appointment request received. Our system will send you an email confirming your appointment time shortly.');
         bookingForm.reset();
         setDefaultDate();
         renderSlots();

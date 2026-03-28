@@ -86,6 +86,19 @@
     .filter-btn{background:var(--dark-2);border:1px solid rgba(255,255,255,0.08);color:var(--gray);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
     .filter-btn.active{background:var(--dark-3);border-color:var(--gold);color:var(--gold);}
 
+    /* Services management */
+    .service-admin-form{background:var(--dark-2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;margin-bottom:14px;}
+    .service-admin-grid{display:grid;grid-template-columns:2fr 1fr;gap:10px;}
+    .service-admin-grid .full{grid-column:1 / -1;}
+    .service-admin-list .service-admin-card{background:var(--dark-2);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;margin-bottom:10px;}
+    .service-admin-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+    .service-admin-name{font-weight:700;font-size:16px;}
+    .service-admin-price{color:var(--gold);font-weight:700;}
+    .service-admin-desc{margin-top:6px;color:var(--gray);font-size:13px;line-height:1.5;}
+    .service-admin-actions{margin-top:10px;display:flex;gap:8px;}
+    .btn-outline-admin{background:transparent;border:1px solid rgba(255,255,255,0.16);color:var(--white);}
+    .btn-outline-admin:hover{border-color:rgba(200,169,110,0.5);color:var(--gold);}
+
     .empty{text-align:center;padding:40px;color:var(--gray);}
 
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--dark-3);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:14px 22px;border-radius:12px;font-size:14px;z-index:999;transition:transform 0.3s ease;}
@@ -136,6 +149,7 @@
         <div class="tab active" onclick="switchTab('today')">Today</div>
         <div class="tab" onclick="switchTab('bookings')">All Bookings</div>
         <div class="tab" onclick="switchTab('clients')">Clients</div>
+        <div class="tab" onclick="switchTab('services')">Services</div>
       </div>
 
       <!-- Today -->
@@ -159,6 +173,30 @@
       <div class="tab-panel" id="tab-clients">
         <div id="clients-list"></div>
       </div>
+
+      <!-- Services -->
+      <div class="tab-panel" id="tab-services">
+        <form class="service-admin-form" onsubmit="createService(event)">
+          <div class="service-admin-grid">
+            <div class="form-group">
+              <label for="service-name">Service Name</label>
+              <input type="text" id="service-name" placeholder="Example: Lineup + Beard" required>
+            </div>
+            <div class="form-group">
+              <label for="service-price">Price</label>
+              <input type="number" id="service-price" min="0" step="1" placeholder="20" required>
+            </div>
+            <div class="form-group full">
+              <label for="service-desc">Description</label>
+              <input type="text" id="service-desc" placeholder="Short description (optional)">
+            </div>
+            <div class="form-group full" style="margin-bottom:0;">
+              <button type="submit" class="btn btn-primary" style="width:100%;">Add Service</button>
+            </div>
+          </div>
+        </form>
+        <div class="service-admin-list" id="services-list"></div>
+      </div>
     </div>
   </div>
 
@@ -168,6 +206,7 @@
     let adminToken = localStorage.getItem('pc_admin_token');
     let allBookings = [];
     let allClients = [];
+    let allServices = [];
 
     if (adminToken) showDashboard();
 
@@ -210,7 +249,22 @@
     }
 
     async function loadAll() {
-      await Promise.all([loadBookings(), loadClients()]);
+      await Promise.all([loadStats(), loadBookings(), loadClients(), loadServices()]);
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/admin/stats', {headers:{'Authorization':'Bearer '+adminToken}});
+        if (res.status === 401) { adminLogout(); return; }
+        if (!res.ok) throw new Error('Failed stats');
+        const stats = await res.json();
+        document.getElementById('stat-total').textContent = stats.total_bookings ?? 0;
+        document.getElementById('stat-pending').textContent = stats.pending_bookings ?? 0;
+        document.getElementById('stat-today').textContent = stats.today_bookings ?? 0;
+        document.getElementById('stat-clients').textContent = stats.clients ?? 0;
+      } catch {
+        showToast('Could not load stats', 'error');
+      }
     }
 
     async function loadBookings() {
@@ -218,7 +272,6 @@
         const res = await fetch('/api/admin/appointments', {headers:{'Authorization':'Bearer '+adminToken}});
         if (res.status === 401) { adminLogout(); return; }
         allBookings = await res.json();
-        updateStats();
         renderToday();
         renderBookings('all');
       } catch { showToast('Could not load bookings', 'error'); }
@@ -227,17 +280,22 @@
     async function loadClients() {
       try {
         const res = await fetch('/api/admin/clients', {headers:{'Authorization':'Bearer '+adminToken}});
+        if (res.status === 401) { adminLogout(); return; }
         allClients = await res.json();
-        document.getElementById('stat-clients').textContent = allClients.length;
         renderClients();
       } catch {}
     }
 
-    function updateStats() {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('stat-total').textContent = allBookings.length;
-      document.getElementById('stat-pending').textContent = allBookings.filter(b=>b.status==='pending').length;
-      document.getElementById('stat-today').textContent = allBookings.filter(b=>b.date===today).length;
+    async function loadServices() {
+      try {
+        const res = await fetch('/api/admin/services', {headers:{'Authorization':'Bearer '+adminToken}});
+        if (res.status === 401) { adminLogout(); return; }
+        if (!res.ok) throw new Error('Failed services');
+        allServices = await res.json();
+        renderServices();
+      } catch {
+        showToast('Could not load services', 'error');
+      }
     }
 
     function statusClass(s) {
@@ -308,15 +366,105 @@
         : `<div class="empty">No clients yet.</div>`;
     }
 
+    function renderServices() {
+      const list = document.getElementById('services-list');
+      if (!allServices.length) {
+        list.innerHTML = '<div class="empty">No services yet.</div>';
+        return;
+      }
+
+      list.innerHTML = allServices.map(function(svc) {
+        const desc = svc.description ? svc.description : 'No description';
+        return `<div class="service-admin-card">
+          <div class="service-admin-top">
+            <div class="service-admin-name">${svc.name}</div>
+            <div class="service-admin-price">$${svc.price}</div>
+          </div>
+          <div class="service-admin-desc">${desc}</div>
+          <div class="service-admin-actions">
+            <button class="btn btn-sm btn-outline-admin" onclick="editService(${svc.id})">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteService(${svc.id})">Delete</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function createService(e) {
+      e.preventDefault();
+      const name = document.getElementById('service-name').value.trim();
+      const price = Number(document.getElementById('service-price').value);
+      const description = document.getElementById('service-desc').value.trim();
+
+      try {
+        const res = await fetch('/api/admin/services', {
+          method:'POST',
+          headers:{'Authorization':'Bearer '+adminToken,'Content-Type':'application/json'},
+          body: JSON.stringify({name, price, description})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to add service');
+        document.getElementById('service-name').value = '';
+        document.getElementById('service-price').value = '';
+        document.getElementById('service-desc').value = '';
+        showToast('Service added', 'success');
+        loadServices();
+      } catch (err) {
+        showToast(err.message || 'Could not add service', 'error');
+      }
+    }
+
+    async function editService(id) {
+      const svc = allServices.find(function(item) { return item.id === id; });
+      if (!svc) return;
+
+      const name = prompt('Service name', svc.name);
+      if (name === null) return;
+      const priceInput = prompt('Service price', String(svc.price));
+      if (priceInput === null) return;
+      const description = prompt('Service description', svc.description || '');
+      if (description === null) return;
+
+      try {
+        const res = await fetch('/api/admin/services/' + id, {
+          method:'PUT',
+          headers:{'Authorization':'Bearer '+adminToken,'Content-Type':'application/json'},
+          body: JSON.stringify({name:name.trim(), price:Number(priceInput), description:description.trim()})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to update service');
+        showToast('Service updated', 'success');
+        loadServices();
+      } catch (err) {
+        showToast(err.message || 'Could not update service', 'error');
+      }
+    }
+
+    async function deleteService(id) {
+      if (!confirm('Delete this service?')) return;
+      try {
+        const res = await fetch('/api/admin/services/' + id, {
+          method:'DELETE',
+          headers:{'Authorization':'Bearer '+adminToken}
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to delete service');
+        showToast('Service deleted', 'success');
+        loadServices();
+      } catch (err) {
+        showToast(err.message || 'Could not delete service', 'error');
+      }
+    }
+
     async function updateStatus(id, status) {
       try {
         const res = await fetch('/api/admin/appointments/'+id, {
           method:'PUT', headers:{'Authorization':'Bearer '+adminToken,'Content-Type':'application/json'},
           body: JSON.stringify({status})
         });
-        if (res.ok) { showToast('Status updated to ' + status, 'success'); loadBookings(); }
-        else throw new Error();
-      } catch { showToast('Failed to update status', 'error'); }
+        const data = await res.json();
+        if (res.ok) { showToast('Status updated to ' + status, 'success'); await Promise.all([loadBookings(), loadStats()]); }
+        else throw new Error(data.error || 'Failed to update status');
+      } catch (err) { showToast(err.message || 'Failed to update status', 'error'); }
     }
 
     async function deleteBooking(id) {
@@ -325,14 +473,15 @@
         const res = await fetch('/api/admin/appointments/'+id, {
           method:'DELETE', headers:{'Authorization':'Bearer '+adminToken}
         });
-        if (res.ok) { showToast('Appointment deleted', 'success'); loadBookings(); }
-        else throw new Error();
-      } catch { showToast('Failed to delete', 'error'); }
+        const data = await res.json();
+        if (res.ok) { showToast('Appointment deleted', 'success'); await Promise.all([loadBookings(), loadStats()]); }
+        else throw new Error(data.error || 'Failed to delete');
+      } catch (err) { showToast(err.message || 'Failed to delete', 'error'); }
     }
 
     function switchTab(t) {
-      document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', ['today','bookings','clients'][i]===t));
-      ['today','bookings','clients'].forEach(id => {
+      document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', ['today','bookings','clients','services'][i]===t));
+      ['today','bookings','clients','services'].forEach(id => {
         const el = document.getElementById('tab-'+id);
         if (el) el.classList.toggle('active', id===t);
       });

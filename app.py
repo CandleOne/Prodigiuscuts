@@ -5,6 +5,7 @@ import os
 import jwt
 import bcrypt
 from datetime import datetime, timedelta
+from functools import wraps
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.environ.get('PRODIGIOUS_DB_PATH', os.path.join(BASE_DIR, 'prodigious.db'))
@@ -13,6 +14,8 @@ SECRET = os.environ.get('JWT_SECRET','secret-key')
 
 app = Flask(__name__)
 CORS(app)
+
+VALID_APPOINTMENT_STATUSES = {'pending', 'confirmed', 'completed', 'cancelled'}
 
 def get_conn():
     conn = sqlite3.connect(DB)
@@ -52,17 +55,18 @@ def startup():
 startup()
 
 def token_required(f):
+    @wraps(f)
     def wrapper(*args,**kwargs):
-        token = request.headers.get('Authorization')
+        auth_header = request.headers.get('Authorization', '')
+        token = auth_header.split(' ')[-1] if auth_header else ''
         if not token:
             return jsonify({'error':'Token required'}),401
         try:
-            payload = jwt.decode(token.split(' ')[-1], SECRET, algorithms=['HS256'])
+            payload = jwt.decode(token, SECRET, algorithms=['HS256'])
             request.user = payload
-        except Exception as e:
+        except Exception:
             return jsonify({'error':'Invalid token'}),401
         return f(*args,**kwargs)
-    wrapper.__name__ = f.__name__
     return wrapper
 
 @app.route('/')
@@ -133,7 +137,6 @@ def my_appointments():
     ''', (user_id,)); rows = [dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
 
 def admin_required(f):
-    from functools import wraps
     @wraps(f)
     def wrapper(*args, **kwargs):
         token = request.headers.get('Authorization', '').split(' ')[-1]
@@ -161,11 +164,96 @@ def admin_login():
 @admin_required
 def admin_appointments():
     conn = get_conn(); cur = conn.cursor(); cur.execute('''
-        SELECT appointments.*, services.price AS price
+        SELECT appointments.*, services.price AS price, users.phone AS phone, users.email AS email
         FROM appointments
         LEFT JOIN services ON services.name = appointments.service
+        LEFT JOIN users ON users.id = appointments.user_id
         ORDER BY appointments.date DESC, appointments.time DESC
     '''); rows=[dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
+
+@app.route('/api/admin/stats', methods=['GET'])
+@admin_required
+def admin_stats():
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+    conn = get_conn(); cur = conn.cursor()
+    cur.execute('SELECT COUNT(*) AS total FROM appointments')
+    total = cur.fetchone()['total']
+    cur.execute('SELECT COUNT(*) AS pending FROM appointments WHERE status=?', ('pending',))
+    pending = cur.fetchone()['pending']
+    cur.execute('SELECT COUNT(*) AS today_count FROM appointments WHERE date=?', (today,))
+    today_count = cur.fetchone()['today_count']
+    cur.execute('SELECT COUNT(*) AS clients FROM users')
+    clients = cur.fetchone()['clients']
+    conn.close()
+    return jsonify({
+        'total_bookings': total,
+        'pending_bookings': pending,
+        'today_bookings': today_count,
+        'clients': clients
+    })
+
+@app.route('/api/admin/services', methods=['GET', 'POST'])
+@admin_required
+def admin_services():
+    conn = get_conn(); cur = conn.cursor()
+    if request.method == 'GET':
+        cur.execute('SELECT id,name,price,description FROM services ORDER BY name ASC')
+        rows = [dict(r) for r in cur.fetchall()]
+        conn.close()
+        return jsonify(rows)
+
+    data = request.json or {}
+    name = (data.get('name') or '').strip()
+    description = (data.get('description') or '').strip()
+    try:
+        price = int(data.get('price'))
+    except Exception:
+        conn.close()
+        return jsonify({'error': 'Price must be a number'}), 400
+
+    if not name:
+        conn.close()
+        return jsonify({'error': 'Service name is required'}), 400
+
+    cur.execute('INSERT INTO services(name,price,description) VALUES(?,?,?)', (name, price, description))
+    conn.commit()
+    service_id = cur.lastrowid
+    conn.close()
+    return jsonify({'ok': True, 'id': service_id}), 201
+
+@app.route('/api/admin/services/<int:sid>', methods=['PUT', 'DELETE'])
+@admin_required
+def admin_service_update(sid):
+    conn = get_conn(); cur = conn.cursor()
+    if request.method == 'DELETE':
+        cur.execute('DELETE FROM services WHERE id=?', (sid,))
+        conn.commit()
+        deleted = cur.rowcount
+        conn.close()
+        if not deleted:
+            return jsonify({'error': 'Service not found'}), 404
+        return jsonify({'ok': True})
+
+    data = request.json or {}
+    name = (data.get('name') or '').strip()
+    description = (data.get('description') or '').strip()
+    try:
+        price = int(data.get('price'))
+    except Exception:
+        conn.close()
+        return jsonify({'error': 'Price must be a number'}), 400
+
+    if not name:
+        conn.close()
+        return jsonify({'error': 'Service name is required'}), 400
+
+    cur.execute('UPDATE services SET name=?, price=?, description=? WHERE id=?', (name, price, description, sid))
+    conn.commit()
+    updated = cur.rowcount
+    conn.close()
+    if not updated:
+        return jsonify({'error': 'Service not found'}), 404
+    return jsonify({'ok': True})
 
 @app.route('/api/admin/clients', methods=['GET'])
 @admin_required
@@ -176,10 +264,18 @@ def admin_clients():
 @admin_required
 def admin_update(aid):
     if request.method=='PUT':
-        status = request.json.get('status','')
-        conn = get_conn(); cur=conn.cursor(); cur.execute('UPDATE appointments SET status=? WHERE id=?',(status,aid)); conn.commit(); conn.close(); return jsonify({'ok':True})
+        status = (request.json or {}).get('status', '').strip().lower()
+        if status not in VALID_APPOINTMENT_STATUSES:
+            return jsonify({'error': 'Invalid status'}), 400
+        conn = get_conn(); cur=conn.cursor(); cur.execute('UPDATE appointments SET status=? WHERE id=?',(status,aid)); conn.commit(); updated = cur.rowcount; conn.close()
+        if not updated:
+            return jsonify({'error': 'Appointment not found'}), 404
+        return jsonify({'ok':True})
     else:
-        conn = get_conn(); cur=conn.cursor(); cur.execute('DELETE FROM appointments WHERE id=?',(aid,)); conn.commit(); conn.close(); return jsonify({'ok':True})
+        conn = get_conn(); cur=conn.cursor(); cur.execute('DELETE FROM appointments WHERE id=?',(aid,)); conn.commit(); deleted = cur.rowcount; conn.close()
+        if not deleted:
+            return jsonify({'error': 'Appointment not found'}), 404
+        return jsonify({'ok':True})
 
 @app.route('/api/appointments/<int:aid>/cancel', methods=['PUT'])
 @token_required

@@ -124,7 +124,13 @@ def book():
 @token_required
 def my_appointments():
     user_id = request.user.get('user_id')
-    conn = get_conn(); cur = conn.cursor(); cur.execute('SELECT * FROM appointments WHERE user_id=?', (user_id,)); rows = [dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
+    conn = get_conn(); cur = conn.cursor(); cur.execute('''
+        SELECT appointments.*, services.price AS price
+        FROM appointments
+        LEFT JOIN services ON services.name = appointments.service
+        WHERE appointments.user_id=?
+        ORDER BY appointments.date DESC, appointments.time DESC
+    ''', (user_id,)); rows = [dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
 
 def admin_required(f):
     from functools import wraps
@@ -154,7 +160,12 @@ def admin_login():
 @app.route('/api/admin/appointments', methods=['GET'])
 @admin_required
 def admin_appointments():
-    conn = get_conn(); cur = conn.cursor(); cur.execute('SELECT * FROM appointments ORDER BY date DESC, time DESC'); rows=[dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
+    conn = get_conn(); cur = conn.cursor(); cur.execute('''
+        SELECT appointments.*, services.price AS price
+        FROM appointments
+        LEFT JOIN services ON services.name = appointments.service
+        ORDER BY appointments.date DESC, appointments.time DESC
+    '''); rows=[dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
 
 @app.route('/api/admin/clients', methods=['GET'])
 @admin_required

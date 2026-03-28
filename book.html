@@ -95,6 +95,15 @@
     .status-msg.success{background:rgba(200,169,110,0.12);border:1px solid rgba(200,169,110,0.34);color:var(--gold);}
     .status-msg.info{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--white);}
 
+    .coupon-row{display:flex;gap:10px;align-items:flex-end;}
+    .coupon-row .form-group{flex:1;}
+    .coupon-row .btn{height:46px;padding:0 18px;white-space:nowrap;}
+    .coupon-feedback{font-size:12px;color:var(--gray);margin-top:6px;}
+    .coupon-feedback.success{color:var(--gold-light);}
+    .price-summary{margin-top:8px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;background:rgba(255,255,255,0.02);}
+    .price-line{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:4px 0;color:var(--gray);}
+    .price-line strong{color:var(--white);font-size:17px;}
+
     .booking-confirm-modal{
       position:fixed;
       inset:0;
@@ -339,6 +348,22 @@
               </select>
             </div>
 
+            <div class="form-group full">
+              <label for="coupon-code">Coupon Code</label>
+              <div class="coupon-row">
+                <div class="form-group" style="margin:0;">
+                  <input type="text" id="coupon-code" placeholder="Enter coupon code">
+                </div>
+                <button type="button" class="btn btn-outline" id="apply-coupon-btn">Apply Coupon</button>
+              </div>
+              <div class="coupon-feedback" id="coupon-feedback">Have a code? Apply it before booking.</div>
+              <div class="price-summary">
+                <div class="price-line"><span>Service Price</span><span id="summary-subtotal">$0</span></div>
+                <div class="price-line"><span>Discount</span><span id="summary-discount">-$0</span></div>
+                <div class="price-line"><span><strong>Total</strong></span><span><strong id="summary-total">$0</strong></span></div>
+              </div>
+            </div>
+
             <div class="form-group">
               <label for="date">Date</label>
               <input type="date" id="date" required>
@@ -427,7 +452,79 @@
     const reviewConfirmBtn = document.getElementById('review-confirm-btn');
     const couponBox = document.getElementById('coupon-box');
     const couponDoneBtn = document.getElementById('coupon-done-btn');
+    const couponCodeEl = document.getElementById('coupon-code');
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const couponFeedback = document.getElementById('coupon-feedback');
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const summaryDiscount = document.getElementById('summary-discount');
+    const summaryTotal = document.getElementById('summary-total');
     const REVIEW_URL = 'https://www.google.com/search?sca_esv=a02f3e9b87f4a5a7&rlz=1C1FHFK_enUS1137US1137&sxsrf=ANbL-n7lY1E7C_LhRpU-bZYLuf7_Ve5_0g:1774708898234&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOcWkmTXUWoTok53UDEVKn1qCayY76QekHMGn3EEzewujJjvo5fssmiqr7qMLG83R8ga5jFUG3ivrcYcODX2JcJXxyYL9&q=Prodigious+cuts+Reviews&sa=X&ved=2ahUKEwjM29Xr6cKTAxUlGtAFHWuaLcIQ0bkNegQIIBAF&biw=767&bih=778&dpr=1.25';
+    var servicePrices = {};
+    var appliedCoupon = { code: '', discountAmount: 0 };
+
+    function formatMoney(amount) {
+      return '$' + String(Number(amount || 0));
+    }
+
+    function getSelectedServicePrice() {
+      return Number(servicePrices[serviceEl.value] || 0);
+    }
+
+    function clearCouponState() {
+      appliedCoupon = { code: '', discountAmount: 0 };
+      couponFeedback.className = 'coupon-feedback';
+      couponFeedback.textContent = 'Have a code? Apply it before booking.';
+    }
+
+    function updatePriceSummary() {
+      var subtotal = getSelectedServicePrice();
+      var discount = Math.min(Number(appliedCoupon.discountAmount || 0), subtotal);
+      var total = Math.max(0, subtotal - discount);
+      summarySubtotal.textContent = formatMoney(subtotal);
+      summaryDiscount.textContent = '-'+ formatMoney(discount);
+      summaryTotal.textContent = formatMoney(total);
+    }
+
+    async function applyCouponCode() {
+      var code = couponCodeEl.value.trim();
+      if (!serviceEl.value) {
+        couponFeedback.className = 'coupon-feedback';
+        couponFeedback.textContent = 'Select a service first, then apply your coupon.';
+        return;
+      }
+      if (!code) {
+        clearCouponState();
+        updatePriceSummary();
+        return;
+      }
+
+      applyCouponBtn.disabled = true;
+      applyCouponBtn.textContent = 'Applying...';
+      try {
+        var response = await fetch('/api/coupons/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: code, service: serviceEl.value })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.valid) {
+          throw new Error(data.error || 'Invalid coupon code.');
+        }
+
+        appliedCoupon = { code: data.code, discountAmount: Number(data.discount_amount || 0) };
+        couponCodeEl.value = data.code;
+        couponFeedback.className = 'coupon-feedback success';
+        couponFeedback.textContent = data.code + ' applied: ' + formatMoney(data.discount_amount) + ' off.';
+      } catch (error) {
+        appliedCoupon = { code: '', discountAmount: 0 };
+        couponFeedback.className = 'coupon-feedback';
+        couponFeedback.textContent = error.message || 'Coupon could not be applied.';
+      } finally {
+        applyCouponBtn.disabled = false;
+        applyCouponBtn.textContent = 'Apply Coupon';
+        updatePriceSummary();
+      }
+    }
 
     function showConfirmModal() {
       confirmModal.classList.add('show');
@@ -606,11 +703,13 @@
         }
 
         serviceEl.innerHTML = '<option value="">Select a service</option>';
+        servicePrices = {};
         services.forEach(function(item) {
           var option = document.createElement('option');
           option.value = item.name;
           option.textContent = item.name + ' - $' + item.price;
           serviceEl.appendChild(option);
+          servicePrices[item.name] = Number(item.price || 0);
         });
       } catch (error) {
         var fallback = [
@@ -622,15 +721,18 @@
           { name: 'Teen Cut', price: 20 }
         ];
         serviceEl.innerHTML = '<option value="">Select a service</option>';
+        servicePrices = {};
         fallback.forEach(function(item) {
           var option = document.createElement('option');
           option.value = item.name;
           option.textContent = item.name + ' - $' + item.price;
           serviceEl.appendChild(option);
+          servicePrices[item.name] = Number(item.price || 0);
         });
       }
 
       applyPreferredServiceSelection();
+      updatePriceSummary();
     }
 
     async function doInlineLogin(event) {
@@ -756,7 +858,8 @@
             service: serviceEl.value,
             date: dateEl.value,
             time: timeEl.value,
-            notes: notesEl.value.trim()
+            notes: notesEl.value.trim(),
+            coupon_code: appliedCoupon.code
           })
         });
 
@@ -768,8 +871,10 @@
         showStatus('Appointment requested successfully. Check your account for status updates.', 'success');
         showConfirmModal();
         bookingForm.reset();
+        clearCouponState();
         setDefaultDate();
         renderSlots();
+        updatePriceSummary();
       } catch (error) {
         showStatus(error.message || 'Booking failed. Please try again.', 'error');
       } finally {
@@ -781,6 +886,10 @@
     dateEl.addEventListener('change', function() {
       clearStatus();
       renderSlots();
+    });
+
+    serviceEl.addEventListener('change', function() {
+      updatePriceSummary();
     });
 
     authTabs.forEach(function(button) {
@@ -799,8 +908,12 @@
     });
     reviewConfirmBtn.addEventListener('click', function() {
       couponBox.classList.add('show');
+      couponCodeEl.value = 'PCUTS5';
+      couponFeedback.className = 'coupon-feedback';
+      couponFeedback.textContent = 'Coupon ready. Tap Apply Coupon to use it.';
     });
     couponDoneBtn.addEventListener('click', hideReviewModal);
+    applyCouponBtn.addEventListener('click', applyCouponCode);
     document.addEventListener('keydown', function(event) {
       if (event.key === 'Escape' && confirmModal.classList.contains('show')) {
         hideConfirmModal(true);

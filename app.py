@@ -16,6 +16,9 @@ app = Flask(__name__)
 CORS(app)
 
 VALID_APPOINTMENT_STATUSES = {'pending', 'confirmed', 'completed', 'cancelled'}
+COUPON_CODES = {
+    'PCUTS5': 5
+}
 
 def get_conn():
     conn = sqlite3.connect(DB)
@@ -28,6 +31,17 @@ def init_db():
     cur.execute('''CREATE TABLE IF NOT EXISTS services(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price INTEGER, description TEXT)''')
     cur.execute('''CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, phone TEXT, password TEXT, joined TEXT)''')
     cur.execute('''CREATE TABLE IF NOT EXISTS appointments(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, name TEXT, service TEXT, date TEXT, time TEXT, notes TEXT, status TEXT, created TEXT)''')
+
+    # Lightweight migration for coupon-aware pricing fields.
+    cur.execute('PRAGMA table_info(appointments)')
+    appointment_columns = {row['name'] for row in cur.fetchall()}
+    if 'coupon_code' not in appointment_columns:
+        cur.execute('ALTER TABLE appointments ADD COLUMN coupon_code TEXT DEFAULT ""')
+    if 'discount_amount' not in appointment_columns:
+        cur.execute('ALTER TABLE appointments ADD COLUMN discount_amount INTEGER DEFAULT 0')
+    if 'final_price' not in appointment_columns:
+        cur.execute('ALTER TABLE appointments ADD COLUMN final_price INTEGER')
+
     conn.commit()
     # seed services if empty
     cur.execute('SELECT COUNT(*) FROM services')
@@ -112,24 +126,79 @@ def login():
 def services():
     conn = get_conn(); cur = conn.cursor(); cur.execute('SELECT id,name,price,description FROM services'); rows = [dict(r) for r in cur.fetchall()]; conn.close(); return jsonify(rows)
 
+def calculate_coupon_discount(raw_code, service_price):
+    code = (raw_code or '').strip().upper()
+    if not code:
+        return '', 0
+    amount = COUPON_CODES.get(code, 0)
+    amount = max(0, min(int(amount), int(service_price)))
+    if amount <= 0:
+        return '', 0
+    return code, amount
+
+@app.route('/api/coupons/validate', methods=['POST'])
+def validate_coupon():
+    data = request.json or {}
+    code = (data.get('code') or '').strip()
+    service_name = (data.get('service') or '').strip()
+
+    if not code:
+        return jsonify({'valid': False, 'error': 'Enter a coupon code.'}), 400
+    if not service_name:
+        return jsonify({'valid': False, 'error': 'Select a service first.'}), 400
+
+    conn = get_conn(); cur = conn.cursor()
+    cur.execute('SELECT price FROM services WHERE name=?', (service_name,))
+    service_row = cur.fetchone()
+    conn.close()
+    if not service_row:
+        return jsonify({'valid': False, 'error': 'Service not found.'}), 404
+
+    normalized_code, discount_amount = calculate_coupon_discount(code, service_row['price'])
+    if not normalized_code:
+        return jsonify({'valid': False, 'error': 'Invalid coupon code.'}), 400
+
+    final_price = max(0, int(service_row['price']) - discount_amount)
+    return jsonify({
+        'valid': True,
+        'code': normalized_code,
+        'discount_amount': discount_amount,
+        'service_price': int(service_row['price']),
+        'final_price': final_price
+    })
+
 @app.route('/api/book', methods=['POST'])
 @token_required
 def book():
-    data = request.json
+    data = request.json or {}
     user_id = data.get('user_id') or request.user.get('user_id')
     name = data.get('name'); service = data.get('service'); date = data.get('date'); time = data.get('time'); notes = data.get('notes','')
     if not all([name, service, date, time]): return jsonify({'error':'Missing fields'}),400
+
     conn = get_conn(); cur = conn.cursor()
-    cur.execute('INSERT INTO appointments(user_id,name,service,date,time,notes,status,created) VALUES(?,?,?,?,?,?,?,?)', (user_id,name,service,date,time,notes,'pending', datetime.utcnow().isoformat()))
+    cur.execute('SELECT price FROM services WHERE name=?', (service,))
+    service_row = cur.fetchone()
+    if not service_row:
+        conn.close()
+        return jsonify({'error': 'Invalid service selected.'}), 400
+
+    base_price = int(service_row['price'])
+    coupon_code, discount_amount = calculate_coupon_discount(data.get('coupon_code'), base_price)
+    final_price = max(0, base_price - discount_amount)
+
+    cur.execute('''
+        INSERT INTO appointments(user_id,name,service,date,time,notes,status,created,coupon_code,discount_amount,final_price)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?)
+    ''', (user_id,name,service,date,time,notes,'pending', datetime.utcnow().isoformat(),coupon_code,discount_amount,final_price))
     conn.commit(); conn.close()
-    return jsonify({'ok':True})
+    return jsonify({'ok':True, 'price': final_price, 'discount_amount': discount_amount, 'coupon_code': coupon_code})
 
 @app.route('/api/appointments', methods=['GET'])
 @token_required
 def my_appointments():
     user_id = request.user.get('user_id')
     conn = get_conn(); cur = conn.cursor(); cur.execute('''
-        SELECT appointments.*, services.price AS price
+        SELECT appointments.*, COALESCE(appointments.final_price, services.price) AS price, services.price AS base_price
         FROM appointments
         LEFT JOIN services ON services.name = appointments.service
         WHERE appointments.user_id=?
@@ -164,7 +233,7 @@ def admin_login():
 @admin_required
 def admin_appointments():
     conn = get_conn(); cur = conn.cursor(); cur.execute('''
-        SELECT appointments.*, services.price AS price, users.phone AS phone, users.email AS email
+        SELECT appointments.*, COALESCE(appointments.final_price, services.price) AS price, services.price AS base_price, users.phone AS phone, users.email AS email
         FROM appointments
         LEFT JOIN services ON services.name = appointments.service
         LEFT JOIN users ON users.id = appointments.user_id

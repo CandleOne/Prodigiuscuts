@@ -142,10 +142,13 @@
 
       function apptCard(a) {
         const isUpcoming = isUpcomingByDay(a);
+        const displayPrice = (typeof a.final_price === 'number' || String(a.final_price || '').length)
+          ? a.final_price
+          : a.price;
         return `<div class="appt-card">
           <div class="appt-top">
             <div class="appt-service">${a.service}</div>
-            <div class="appt-price">$${a.price || '—'}</div>
+            <div class="appt-price">$${displayPrice || '—'}</div>
           </div>
           <div class="appt-meta">
             <span>📅 ${a.date}</span>

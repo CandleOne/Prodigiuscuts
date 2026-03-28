@@ -303,11 +303,14 @@
     }
 
     function bookingCard(b, highlight=false) {
+      const displayPrice = (typeof b.final_price === 'number' || String(b.final_price || '').length)
+        ? b.final_price
+        : b.price;
       return `<div class="booking-card ${highlight?'today':''}">
         <div class="booking-top">
           <div>
             <div class="booking-name">${b.name}</div>
-            <div class="booking-service">${b.service}</div>
+            <div class="booking-service">${b.service} · $${displayPrice || '—'}</div>
           </div>
           <span class="status ${statusClass(b.status)}">${b.status}</span>
         </div>

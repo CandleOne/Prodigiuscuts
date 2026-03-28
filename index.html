@@ -476,37 +476,6 @@
       flex: 1;
     }
 
-    .login-nudge {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: min(460px, calc(100% - 28px));
-      z-index: 430;
-      padding: 18px 22px;
-      border-radius: 16px;
-      border: 1px solid rgba(234,215,171,0.38);
-      background: rgba(12,12,12,0.9);
-      color: var(--white);
-      box-shadow: 0 22px 42px rgba(0,0,0,0.34);
-      text-align: center;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s ease;
-    }
-    .login-nudge strong {
-      display: block;
-      font-size: 18px;
-      line-height: 1.25;
-      font-weight: 700;
-      color: #f4e2ba;
-    }
-    .login-nudge.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translate(-50%, -50%);
-    }
 
     /* ── About ── */
     .about { padding: 100px 0; background: var(--dark-2); }
@@ -856,10 +825,6 @@
     </div>
   </div>
 
-  <div class="login-nudge" id="login-nudge" role="status" aria-live="polite">
-    <strong>Log in to make an appointment.</strong>
-  </div>
-
   <!-- ── About ── -->
   <section class="about" id="about">
     <div class="container">
@@ -1154,9 +1119,7 @@
     var bookingModalFrame = document.getElementById('booking-modal-frame');
     var bookingModalClose = document.getElementById('booking-modal-close');
     var bookingModalSubtitle = document.getElementById('booking-modal-subtitle');
-    var loginNudge = document.getElementById('login-nudge');
     var serviceCards = document.querySelectorAll('.service-bookable');
-    var loginNudgeTimer = null;
 
     function openBookingModal(serviceName) {
       var query = 'modal=1';
@@ -1183,20 +1146,13 @@
       return hasSession();
     }
 
-    function showLoginNudgeThenRedirect(serviceName) {
-      if (loginNudgeTimer) {
-        window.clearTimeout(loginNudgeTimer);
+    function redirectToAuthForBooking(serviceName) {
+      var redirectTarget = 'book.html';
+      if (serviceName) {
+        redirectTarget += '?service=' + encodeURIComponent(serviceName);
       }
-      loginNudge.classList.add('open');
-      loginNudgeTimer = window.setTimeout(function() {
-        loginNudge.classList.remove('open');
-        var redirectTarget = 'book.html';
-        if (serviceName) {
-          redirectTarget += '?service=' + encodeURIComponent(serviceName);
-        }
-        sessionStorage.setItem('pc_redirect', redirectTarget);
-        window.location.href = 'login.html#register';
-      }, 1300);
+      sessionStorage.setItem('pc_redirect', redirectTarget);
+      window.location.href = 'login.html#register';
     }
 
     serviceCards.forEach(function(card) {
@@ -1205,7 +1161,7 @@
         if (userIsLoggedIn()) {
           openBookingModal(serviceName);
         } else {
-          showLoginNudgeThenRedirect(serviceName);
+          redirectToAuthForBooking(serviceName);
         }
       });
       card.addEventListener('keydown', function(event) {
@@ -1214,7 +1170,7 @@
           if (userIsLoggedIn()) {
             openBookingModal(serviceName);
           } else {
-            showLoginNudgeThenRedirect(serviceName);
+            redirectToAuthForBooking(serviceName);
           }
         }
       });

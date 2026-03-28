@@ -122,8 +122,12 @@
     </div>
     <div class="login-card">
       <h2>Admin Access</h2>
-      <p>Enter your admin password to continue.</p>
+      <p>Sign in with the admin account to continue.</p>
       <form onsubmit="adminLogin(event)">
+        <div class="form-group">
+          <label>Admin Email</label>
+          <input type="email" id="admin-email" value="admin@prodigiouscuts.com" placeholder="admin@prodigiouscuts.com" required>
+        </div>
         <div class="form-group">
           <label>Admin Password</label>
           <input type="password" id="admin-pass" placeholder="••••••••" required>
@@ -231,13 +235,14 @@
 
     async function adminLogin(e) {
       e.preventDefault();
+      const email = document.getElementById('admin-email').value.trim();
       const pass = document.getElementById('admin-pass').value;
       const btn = document.getElementById('admin-login-btn');
       btn.disabled = true; btn.textContent = 'Checking...';
       try {
         const res = await fetch('/api/admin/login', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({password: pass})
+          body: JSON.stringify({email, password: pass})
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Wrong password');

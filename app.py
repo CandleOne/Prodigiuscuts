@@ -12,6 +12,7 @@ from functools import wraps
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.environ.get('PRODIGIOUS_DB_PATH', os.path.join(BASE_DIR, 'prodigious.db'))
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@prodigiouscuts.com')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD','admin123')
 SECRET = os.environ.get('JWT_SECRET','secret-key')
 GOOGLE_PLACES_API_KEY = os.environ.get('GOOGLE_PLACES_API_KEY', '')
@@ -37,6 +38,11 @@ def init_db():
     cur.execute('''CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, phone TEXT, password TEXT, joined TEXT)''')
     cur.execute('''CREATE TABLE IF NOT EXISTS appointments(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, name TEXT, service TEXT, date TEXT, time TEXT, notes TEXT, status TEXT, created TEXT)''')
 
+    cur.execute('PRAGMA table_info(users)')
+    user_columns = {row['name'] for row in cur.fetchall()}
+    if 'is_admin' not in user_columns:
+        cur.execute('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0')
+
     # Lightweight migration for coupon-aware pricing fields.
     cur.execute('PRAGMA table_info(appointments)')
     appointment_columns = {row['name'] for row in cur.fetchall()}
@@ -61,6 +67,18 @@ def init_db():
         ]
         cur.executemany('INSERT INTO services(name,price,description) VALUES(?,?,?)', services)
         conn.commit()
+
+    admin_password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode(), bcrypt.gensalt()).decode()
+    cur.execute('SELECT id FROM users WHERE email=?', (ADMIN_EMAIL,))
+    admin_row = cur.fetchone()
+    if admin_row:
+        cur.execute('UPDATE users SET name=?, password=?, is_admin=1 WHERE email=?', ('Admin', admin_password_hash, ADMIN_EMAIL))
+    else:
+        cur.execute(
+            'INSERT INTO users(name,email,phone,password,joined,is_admin) VALUES(?,?,?,?,?,?)',
+            ('Admin', ADMIN_EMAIL, '', admin_password_hash, datetime.utcnow().isoformat(), 1)
+        )
+    conn.commit()
     conn.close()
 
 def startup():
@@ -279,10 +297,22 @@ def admin_required(f):
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
     data = request.json or {}
-    if data.get('password') != ADMIN_PASSWORD:
+    email = (data.get('email') or '').strip().lower()
+    password = data.get('password') or ''
+    if not email or not password:
+        return jsonify({'error': 'Email and password are required'}), 400
+
+    conn = get_conn(); cur = conn.cursor()
+    cur.execute('SELECT id,name,email,password,is_admin FROM users WHERE email=?', (email,))
+    row = cur.fetchone()
+    conn.close()
+    if not row or not row['is_admin']:
+        return jsonify({'error': 'Admin account not found'}), 401
+    if not bcrypt.checkpw(password.encode(), row['password'].encode()):
         return jsonify({'error': 'Wrong password'}), 401
-    token = jwt.encode({'is_admin': True, 'exp': datetime.utcnow() + timedelta(hours=12)}, SECRET, algorithm='HS256')
-    return jsonify({'token': token})
+
+    token = jwt.encode({'is_admin': True, 'admin_user_id': row['id'], 'admin_email': row['email'], 'exp': datetime.utcnow() + timedelta(hours=12)}, SECRET, algorithm='HS256')
+    return jsonify({'token': token, 'admin': {'id': row['id'], 'name': row['name'], 'email': row['email']}})
 
 @app.route('/api/admin/appointments', methods=['GET'])
 @admin_required

@@ -95,6 +95,47 @@
     .status-msg.success{background:rgba(200,169,110,0.12);border:1px solid rgba(200,169,110,0.34);color:var(--gold);}
     .status-msg.info{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--white);}
 
+    .booking-confirm-modal{
+      position:fixed;
+      inset:0;
+      z-index:220;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .booking-confirm-modal.show{display:flex;}
+    .booking-confirm-backdrop{
+      position:absolute;
+      inset:0;
+      background:rgba(6,6,6,0.58);
+      backdrop-filter:blur(3px);
+      -webkit-backdrop-filter:blur(3px);
+    }
+    .booking-confirm-dialog{
+      position:relative;
+      z-index:1;
+      width:min(520px,100%);
+      border-radius:18px;
+      border:1px solid rgba(200,169,110,0.34);
+      background:linear-gradient(180deg,rgba(26,26,26,0.98),rgba(13,13,13,0.98));
+      box-shadow:0 24px 60px rgba(0,0,0,0.34);
+      padding:22px 20px;
+      text-align:center;
+    }
+    .booking-confirm-dialog h3{
+      font-family:'Playfair Display',serif;
+      font-size:28px;
+      margin-bottom:8px;
+      color:var(--gold-light);
+    }
+    .booking-confirm-dialog p{
+      color:var(--white);
+      font-size:15px;
+      line-height:1.7;
+      margin-bottom:16px;
+    }
+
     .btn{padding:14px 28px;border-radius:var(--radius);font-weight:600;font-size:15px;border:none;cursor:pointer;transition:all 0.3s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
     .btn-primary{background:var(--gold);color:var(--dark);}
     .btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);}
@@ -257,6 +298,15 @@
         </form>
 
         <div class="status-msg" id="status-msg"></div>
+
+        <div class="booking-confirm-modal" id="booking-confirm-modal" aria-hidden="true">
+          <div class="booking-confirm-backdrop" id="booking-confirm-backdrop"></div>
+          <div class="booking-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-confirm-title">
+            <h3 id="booking-confirm-title">Appointment Request Sent</h3>
+            <p>Our system will send you an email confirming your appointment time shortly.</p>
+            <button type="button" class="btn btn-primary" id="booking-confirm-ok">Got it</button>
+          </div>
+        </div>
       </section>
     </div>
   </div>
@@ -283,6 +333,19 @@
     const authRegisterForm = document.getElementById('auth-register-form');
     const authLoginBtn = document.getElementById('auth-login-btn');
     const authRegisterBtn = document.getElementById('auth-register-btn');
+    const confirmModal = document.getElementById('booking-confirm-modal');
+    const confirmBackdrop = document.getElementById('booking-confirm-backdrop');
+    const confirmOk = document.getElementById('booking-confirm-ok');
+
+    function showConfirmModal() {
+      confirmModal.classList.add('show');
+      confirmModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideConfirmModal() {
+      confirmModal.classList.remove('show');
+      confirmModal.setAttribute('aria-hidden', 'true');
+    }
 
     function applyModalEmbedMode() {
       if (!isModalEmbed) {
@@ -597,7 +660,7 @@
         }
 
         showStatus('Appointment requested successfully. Check your account for status updates.', 'success');
-        window.alert('Appointment request received. Our system will send you an email confirming your appointment time shortly.');
+        showConfirmModal();
         bookingForm.reset();
         setDefaultDate();
         renderSlots();
@@ -622,6 +685,13 @@
 
     authLoginForm.addEventListener('submit', doInlineLogin);
     authRegisterForm.addEventListener('submit', doInlineRegister);
+    confirmOk.addEventListener('click', hideConfirmModal);
+    confirmBackdrop.addEventListener('click', hideConfirmModal);
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && confirmModal.classList.contains('show')) {
+        hideConfirmModal();
+      }
+    });
 
     applyModalEmbedMode();
     setDefaultDate();

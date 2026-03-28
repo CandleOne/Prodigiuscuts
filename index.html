@@ -215,164 +215,153 @@
     /* ── Services ── */
     .services {
       padding: 110px 0;
-      position: relative;
     }
-    .services::before {
+    .services-stage {
+      position: relative;
+      padding: 52px 48px 36px;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.34) 0%, rgba(0,0,0,0.64) 100%),
+        url('flyer.jpg') center/cover no-repeat;
+      box-shadow: 0 26px 60px rgba(0,0,0,0.34);
+    }
+    .services-stage::before {
       content: '';
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(circle at 12% 18%, rgba(200,169,110,0.08) 0%, transparent 30%),
-        linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0) 100%);
+      background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.4) 100%);
       pointer-events: none;
     }
-    .services .container {
+    .services-header {
       position: relative;
       z-index: 1;
+      text-align: center;
+      margin-bottom: 34px;
     }
-    .services-header { text-align: center; margin-bottom: 56px; }
-    .services-header .section-subtitle { margin: 0 auto; }
+    .services-header .section-tag { color: #ead7ab; }
+    .services-header .section-title {
+      margin-bottom: 10px;
+      font-size: clamp(34px, 5vw, 56px);
+      text-shadow: 0 8px 20px rgba(0,0,0,0.26);
+    }
+    .services-header .section-subtitle {
+      margin: 0 auto;
+      color: rgba(255,255,255,0.82);
+      max-width: 620px;
+    }
     .services-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-      align-items: stretch;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
     }
     .service-card {
-      flex: 1 1 calc(33.333% - 18px);
-      min-width: 260px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%),
-        rgba(20,20,20,0.94);
-      border-radius: 22px;
-      padding: 24px 22px 20px;
-      border: 1px solid rgba(255,255,255,0.06);
-      transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-      position: relative;
-      overflow: hidden;
+      min-height: 190px;
+      background: rgba(200,169,110,0.92);
+      color: var(--white);
+      border-radius: 0;
+      padding: 24px 20px;
       display: flex;
       flex-direction: column;
-      min-height: 260px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s ease, background 0.25s ease;
     }
     .service-card::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(200,169,110,0.12) 0%, transparent 26%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.35s ease;
+      border: 1px solid rgba(255,255,255,0.18);
       pointer-events: none;
     }
-    .service-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 22px;
-      right: 22px;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(200,169,110,0) 0%, rgba(200,169,110,0.9) 50%, rgba(200,169,110,0) 100%);
-      opacity: 0.55;
-    }
     .service-card:hover {
-      border-color: rgba(200,169,110,0.22);
-      transform: translateY(-6px);
-      box-shadow: 0 18px 44px rgba(0,0,0,0.28);
+      transform: translateY(-4px);
+      background: rgba(214,185,123,0.96);
     }
-    .service-card:hover::before { opacity: 1; }
     .service-card-top {
+      margin-bottom: 14px;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 20px;
+      justify-content: center;
+      width: 100%;
     }
     .service-icon {
-      width: 48px;
-      height: 48px;
-      background: rgba(200,169,110,0.1);
-      border: 1px solid rgba(200,169,110,0.12);
-      border-radius: 14px;
+      width: 72px;
+      height: 72px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      font-size: 38px;
+      line-height: 1;
+      color: var(--white);
+      border: 2px solid rgba(255,255,255,0.18);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
     }
-    .service-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 8px;
-      margin-left: auto;
+    .service-meta,
+    .service-note,
+    .service-card p,
+    .service-badge {
+      display: none;
     }
     .service-card h3 {
       font-size: 20px;
+      line-height: 1.2;
       margin-bottom: 10px;
       font-family: 'Inter', sans-serif;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      max-width: 240px;
-    }
-    .service-card p {
-      color: #9f9f9f;
-      font-size: 14px;
-      line-height: 1.7;
-      margin-bottom: 24px;
-      max-width: 30ch;
+      color: var(--white);
     }
     .service-card-bottom {
-      margin-top: auto;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 16px;
-    }
-    .service-note {
-      color: rgba(255,255,255,0.46);
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     }
     .service-price {
       font-family: 'Playfair Display', serif;
-      font-size: 42px;
-      line-height: 0.95;
-      color: var(--gold);
+      font-size: 34px;
+      line-height: 1;
+      color: var(--white);
       font-weight: 800;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.03em;
     }
-    .service-price small { font-size: 14px; color: var(--gray); font-family: 'Inter', sans-serif; font-weight: 400; }
-    .service-badge {
-      display: inline-flex;
-      align-items: center;
-      background: rgba(200,169,110,0.12);
-      color: var(--gold);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
+    .service-price small {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.78);
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 5px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(200,169,110,0.14);
     }
 
     /* ── Policies Banner ── */
     .policies-banner {
-      background: var(--dark-2);
-      border: 1px solid rgba(200,169,110,0.2);
-      border-radius: 16px;
-      padding: 28px 32px;
-      margin-top: 40px;
+      position: relative;
+      z-index: 1;
+      background: rgba(18,18,18,0.72);
+      border: 1px solid rgba(234,215,171,0.22);
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin-top: 20px;
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 12px 24px;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
     .policy-item {
       display: flex; align-items: center; gap: 10px;
-      font-size: 14px; color: var(--white);
+      font-size: 13px; color: rgba(255,255,255,0.92);
     }
     .policy-item .dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -480,7 +469,8 @@
 
     /* ── Responsive ── */
     @media (max-width: 1024px) {
-      .service-card { flex-basis: calc(50% - 18px); }
+      .services-stage { padding: 44px 28px 28px; }
+      .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .gallery-grid { grid-template-columns: repeat(2, 1fr); }
       .testimonials-grid { grid-template-columns: 1fr; }
     }
@@ -499,7 +489,10 @@
       .hero-stats { justify-content: center; }
       .hero-image-frame { max-width: 320px; margin: 0 auto; }
       .hero-badge { bottom: -14px; left: 50%; transform: translateX(-50%); }
-      .service-card { flex-basis: 100%; min-width: 0; }
+      .services-stage { padding: 32px 18px 20px; }
+      .services-grid { grid-template-columns: 1fr; gap: 12px; }
+      .service-card { min-height: 168px; }
+      .service-icon { width: 62px; height: 62px; font-size: 32px; }
       .about-grid { grid-template-columns: 1fr; }
       .gallery-grid { grid-template-columns: repeat(2, 1fr); }
       .contact-grid { grid-template-columns: 1fr; }
@@ -604,104 +597,90 @@
   <!-- ── Services ── -->
   <section class="services" id="services">
     <div class="container">
-      <div class="services-header fade-in">
-        <div class="section-tag">Services &amp; Pricing</div>
-        <h2 class="section-title">Every Cut, Every Style</h2>
-        <p class="section-subtitle">From fresh fades to kids cuts — precise, affordable, and always on point.</p>
-      </div>
-      <div class="services-grid">
-        <div class="service-card fade-in">
-          <div class="service-card-top">
-            <div class="service-icon">✂️</div>
-            <div class="service-meta">
-              <div class="service-badge">Appointments</div>
+      <div class="services-stage fade-in">
+        <div class="services-header">
+          <div class="section-tag">Services &amp; Pricing</div>
+          <h2 class="section-title">Barbershop Services</h2>
+          <p class="section-subtitle">Fresh cuts, sharp finishes, and detail work tailored to the way Prodigious Cuts serves Livingston.</p>
+        </div>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-card-top">
+              <div class="service-icon">✂</div>
+            </div>
+            <h3>Men's Haircut</h3>
+            <div class="service-card-bottom">
+              <div class="service-price">$30<small>Tuesday Appointments</small></div>
             </div>
           </div>
-          <h3>Men's Haircut</h3>
-          <p>Precision cut tailored to your style. Appointments available Tuesday; walk-ins welcome Wed–Sat.</p>
-          <div class="service-card-bottom">
-            <div class="service-note">Classic Precision</div>
-            <div class="service-price">$30</div>
+          <div class="service-card">
+            <div class="service-card-top">
+              <div class="service-icon">🪒</div>
+            </div>
+            <h3>Men's Beard &amp; Taper</h3>
+            <div class="service-card-bottom">
+              <div class="service-price">$20<small>Sharp Finish</small></div>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="service-card-top">
+              <div class="service-icon">✦</div>
+            </div>
+            <h3>Women's Haircut</h3>
+            <div class="service-card-bottom">
+              <div class="service-price">$20<small>Clean Styling</small></div>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="service-card-top">
+              <div class="service-icon">◇</div>
+            </div>
+            <h3>Women's Cut + Design</h3>
+            <div class="service-card-bottom">
+              <div class="service-price">$25<small>Custom Detail</small></div>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="service-card-top">
+              <div class="service-icon">◌</div>
+            </div>
+            <h3>Kids Cut</h3>
+            <div class="service-card-bottom">
+              <div class="service-price">$15<small>Age 12 &amp; Under</small></div>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="service-card-top">
+              <div class="service-icon">△</div>
+            </div>
+            <h3>Teen Cut</h3>
+            <div class="service-card-bottom">
+              <div class="service-price">$20<small>Ages 13–18</small></div>
+            </div>
           </div>
         </div>
-        <div class="service-card fade-in">
-          <div class="service-card-top">
-            <div class="service-icon">🪒</div>
-          </div>
-          <h3>Men's Beard &amp; Taper</h3>
-          <p>Sharp taper with a clean beard trim and lineup. Looking fresh from head to chin.</p>
-          <div class="service-card-bottom">
-            <div class="service-note">Sharp Finish</div>
-            <div class="service-price">$20</div>
-          </div>
-        </div>
-        <div class="service-card fade-in">
-          <div class="service-card-top">
-            <div class="service-icon">💇</div>
-          </div>
-          <h3>Women's Haircut</h3>
-          <p>Clean, styled women's cut by skilled hands. Confidence starts with a great cut.</p>
-          <div class="service-card-bottom">
-            <div class="service-note">Clean Styling</div>
-            <div class="service-price">$20</div>
-          </div>
-        </div>
-        <div class="service-card fade-in">
-          <div class="service-card-top">
-            <div class="service-icon">✨</div>
-          </div>
-          <h3>Women's Cut + Design</h3>
-          <p>Women's cut with custom design work — style meets artistry.</p>
-          <div class="service-card-bottom">
-            <div class="service-note">Design Upgrade</div>
-            <div class="service-price">$25</div>
-          </div>
-        </div>
-        <div class="service-card fade-in">
-          <div class="service-card-top">
-            <div class="service-icon">👦</div>
-          </div>
-          <h3>Kids Cut</h3>
-          <p>For the little ones 12 &amp; under. Patient, friendly, and fun. Fresh cuts the whole family can trust.</p>
-          <div class="service-card-bottom">
-            <div class="service-note">Age 12 &amp; Under</div>
-            <div class="service-price">$15</div>
-          </div>
-        </div>
-        <div class="service-card fade-in">
-          <div class="service-card-top">
-            <div class="service-icon">🧑</div>
-          </div>
-          <h3>Teen Cut</h3>
-          <p>For teens ages 13–18. Sharp styles for every vibe.</p>
-          <div class="service-card-bottom">
-            <div class="service-note">Ages 13–18</div>
-            <div class="service-price">$20</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Enhancements + Policies -->
-      <div class="policies-banner fade-in" style="margin-top:40px;">
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>✨ Enhancements add-on: <strong style="color:var(--gold)">$5</strong></span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>Appointments recommended</span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>Walk-ins welcome</span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>Hot Seat Option skips walk-ins, not appointments</span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>After-hours fee: <strong style="color:var(--gold)">+$10</strong></span>
+        <div class="policies-banner">
+          <div class="policy-item">
+            <div class="dot"></div>
+            <span>Enhancements add-on: <strong style="color:#ead7ab">$5</strong></span>
+          </div>
+          <div class="policy-item">
+            <div class="dot"></div>
+            <span>Appointments recommended</span>
+          </div>
+          <div class="policy-item">
+            <div class="dot"></div>
+            <span>Walk-ins welcome</span>
+          </div>
+          <div class="policy-item">
+            <div class="dot"></div>
+            <span>Hot Seat skips walk-ins, not appointments</span>
+          </div>
+          <div class="policy-item">
+            <div class="dot"></div>
+            <span>After-hours fee: <strong style="color:#ead7ab">+$10</strong></span>
+          </div>
         </div>
       </div>
     </div>

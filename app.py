@@ -6,7 +6,8 @@ import jwt
 import bcrypt
 from datetime import datetime, timedelta
 
-DB = '/home/john/.openclaw/workspace/OurPage/websitepreviews/ProdigiousCuts/prodigious.db'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB = os.environ.get('PRODIGIOUS_DB_PATH', os.path.join(BASE_DIR, 'prodigious.db'))
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD','admin123')
 SECRET = os.environ.get('JWT_SECRET','secret-key')
 
@@ -40,11 +41,15 @@ def init_db():
         conn.commit()
     conn.close()
 
-@app.before_first_request
 def startup():
+    db_dir = os.path.dirname(DB)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
     if not os.path.exists(DB):
         open(DB,'w').close()
     init_db()
+
+startup()
 
 def token_required(f):
     def wrapper(*args,**kwargs):

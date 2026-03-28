@@ -391,18 +391,27 @@
       position: fixed;
       inset: 0;
       z-index: 400;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.28s ease, visibility 0.28s ease;
     }
-    .booking-modal.open { display: flex; }
+    .booking-modal.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
     .booking-modal-backdrop {
       position: absolute;
       inset: 0;
-      background: rgba(5,5,5,0.78);
+      background: rgba(5,5,5,0.52);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
+      transition: background 0.28s ease;
     }
     .booking-modal-dialog {
       position: relative;
@@ -416,6 +425,13 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    .booking-modal.open .booking-modal-dialog {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
     .booking-modal-header {
       display: flex;

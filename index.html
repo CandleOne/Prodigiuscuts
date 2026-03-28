@@ -292,6 +292,13 @@
       transform: translateY(-4px);
       background: rgba(214,185,123,0.96);
     }
+    .service-bookable {
+      cursor: pointer;
+    }
+    .service-bookable:focus-visible {
+      outline: 3px solid rgba(255,255,255,0.75);
+      outline-offset: 2px;
+    }
     .service-icon {
       width: 72px;
       height: 72px;
@@ -376,6 +383,81 @@
     .policy-item .dot {
       width: 8px; height: 8px; border-radius: 50%;
       background: var(--gold); flex-shrink: 0;
+    }
+
+    /* ── Booking Modal ── */
+    body.modal-open { overflow: hidden; }
+    .booking-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .booking-modal.open { display: flex; }
+    .booking-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(5,5,5,0.78);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .booking-modal-dialog {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, 100%);
+      height: min(90vh, 900px);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(10,10,10,0.98);
+      box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .booking-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(18,18,18,0.94);
+    }
+    .booking-modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      line-height: 1.1;
+      margin: 0;
+    }
+    .booking-modal-subtitle {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: var(--gray);
+    }
+    .booking-modal-close {
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 50%;
+      background: rgba(255,255,255,0.02);
+      color: var(--white);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .booking-modal-close:hover {
+      border-color: rgba(200,169,110,0.5);
+      color: var(--gold-light);
+    }
+    .booking-modal-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: var(--dark);
+      flex: 1;
     }
 
     /* ── About ── */
@@ -518,6 +600,13 @@
       .contact-grid { grid-template-columns: 1fr; }
       .form-row { flex-direction: column; }
       .services, .about, .gallery, .testimonials, .booking, .contact { padding: 60px 0; }
+      .booking-modal { padding: 8px; }
+      .booking-modal-dialog {
+        width: 100%;
+        height: min(95vh, 980px);
+        border-radius: 14px;
+      }
+      .booking-modal-title { font-size: 20px; }
     }
   </style>
 </head>
@@ -625,42 +714,42 @@
           <p class="section-subtitle">Fresh cuts, sharp finishes, and detail work tailored to the way Prodigious Cuts serves Livingston.</p>
         </div>
         <div class="services-grid">
-          <div class="service-card">
+          <div class="service-card service-bookable" role="button" tabindex="0" data-service="Men's Haircut" aria-label="Book Men's Haircut">
             <h3>Men's Haircut</h3>
             <div class="service-card-bottom">
               <div class="service-price">$30<small>Tuesday Appointments</small></div>
             </div>
             <div class="service-icon"><img src="assets/images/mens%20cut.png" alt="Men's haircut icon"></div>
           </div>
-          <div class="service-card">
+          <div class="service-card service-bookable" role="button" tabindex="0" data-service="Men's Beard &amp; Taper" aria-label="Book Men's Beard and Taper">
             <h3>Men's Beard &amp; Taper</h3>
             <div class="service-card-bottom">
               <div class="service-price">$20<small>Sharp Finish</small></div>
             </div>
             <div class="service-icon"><img src="assets/images/men+bear.png" alt="Men's beard and taper icon"></div>
           </div>
-          <div class="service-card">
+          <div class="service-card service-bookable" role="button" tabindex="0" data-service="Women's Haircut" aria-label="Book Women's Haircut">
             <h3>Women's Haircut</h3>
             <div class="service-card-bottom">
               <div class="service-price">$20<small>Clean Styling</small></div>
             </div>
             <div class="service-icon"><img src="assets/images/womenscut.png" alt="Women's haircut icon"></div>
           </div>
-          <div class="service-card">
+          <div class="service-card service-bookable" role="button" tabindex="0" data-service="Women's Cut + Design" aria-label="Book Women's Cut plus Design">
             <h3>Women's Cut + Design</h3>
             <div class="service-card-bottom">
               <div class="service-price">$25<small>Custom Detail</small></div>
             </div>
             <div class="service-icon"><img src="assets/images/Womens+design.png" alt="Women's cut and design icon"></div>
           </div>
-          <div class="service-card">
+          <div class="service-card service-bookable" role="button" tabindex="0" data-service="Kids Cut" aria-label="Book Kids Cut">
             <h3>Kids Cut</h3>
             <div class="service-card-bottom">
               <div class="service-price">$15<small>Age 12 &amp; Under</small></div>
             </div>
             <div class="service-icon"><img src="assets/images/kidscut.png" alt="Kids cut icon"></div>
           </div>
-          <div class="service-card">
+          <div class="service-card service-bookable" role="button" tabindex="0" data-service="Teen Cut" aria-label="Book Teen Cut">
             <h3>Teen Cut</h3>
             <div class="service-card-bottom">
               <div class="service-price">$20<small>Ages 13–18</small></div>
@@ -694,6 +783,20 @@
       </div>
     </div>
   </section>
+
+  <div class="booking-modal" id="booking-modal" aria-hidden="true">
+    <div class="booking-modal-backdrop" data-close-booking-modal="true"></div>
+    <div class="booking-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+      <div class="booking-modal-header">
+        <div>
+          <h3 class="booking-modal-title" id="booking-modal-title">Book Appointment</h3>
+          <p class="booking-modal-subtitle" id="booking-modal-subtitle">Complete your request without leaving this page.</p>
+        </div>
+        <button type="button" class="booking-modal-close" id="booking-modal-close" aria-label="Close booking dialog">&times;</button>
+      </div>
+      <iframe class="booking-modal-frame" id="booking-modal-frame" title="Book an appointment"></iframe>
+    </div>
+  </div>
 
   <!-- ── About ── -->
   <section class="about" id="about">
@@ -933,6 +1036,58 @@
       });
     }, { threshold: 0.12 });
     fadeEls.forEach(function(el) { observer.observe(el); });
+
+    var bookingModal = document.getElementById('booking-modal');
+    var bookingModalFrame = document.getElementById('booking-modal-frame');
+    var bookingModalClose = document.getElementById('booking-modal-close');
+    var bookingModalSubtitle = document.getElementById('booking-modal-subtitle');
+    var serviceCards = document.querySelectorAll('.service-bookable');
+
+    function openBookingModal(serviceName) {
+      var query = 'modal=1';
+      if (serviceName) {
+        query += '&service=' + encodeURIComponent(serviceName);
+      }
+      bookingModalFrame.src = 'book.html?' + query;
+      bookingModal.classList.add('open');
+      bookingModal.setAttribute('aria-hidden', 'false');
+      bookingModalSubtitle.textContent = serviceName
+        ? 'Booking for ' + serviceName + '. Complete your request without leaving this page.'
+        : 'Complete your request without leaving this page.';
+      document.body.classList.add('modal-open');
+    }
+
+    function closeBookingModal() {
+      bookingModal.classList.remove('open');
+      bookingModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+      window.setTimeout(function() { bookingModalFrame.src = ''; }, 120);
+    }
+
+    serviceCards.forEach(function(card) {
+      var serviceName = card.getAttribute('data-service');
+      card.addEventListener('click', function() {
+        openBookingModal(serviceName);
+      });
+      card.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openBookingModal(serviceName);
+        }
+      });
+    });
+
+    bookingModalClose.addEventListener('click', closeBookingModal);
+    bookingModal.addEventListener('click', function(event) {
+      if (event.target && event.target.getAttribute('data-close-booking-modal') === 'true') {
+        closeBookingModal();
+      }
+    });
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && bookingModal.classList.contains('open')) {
+        closeBookingModal();
+      }
+    });
 
   </script>
 </body>

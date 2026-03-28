@@ -93,6 +93,22 @@
     .btn-outline{background:transparent;color:var(--gray);border:2px solid rgba(255,255,255,0.1);}
     .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
     .btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+    body.modal-embed{min-height:auto;}
+    body.modal-embed::before{display:none;}
+    body.modal-embed .top-bar{display:none;}
+    body.modal-embed .page{padding:0;max-width:none;}
+    body.modal-embed .booking-shell{grid-template-columns:1fr;gap:0;}
+    body.modal-embed .booking-panel{display:none;}
+    body.modal-embed .widget-card{
+      min-height:auto;
+      border-radius:0;
+      border:none;
+      box-shadow:none;
+      padding:20px;
+      background:rgba(13,13,13,0.98);
+    }
+
     @media (max-width: 900px){
       .booking-shell{grid-template-columns:1fr;}
       .widget-card{min-height:680px;}
@@ -238,6 +254,10 @@
   </div>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const isModalEmbed = urlParams.get('modal') === '1';
+    const preferredService = (urlParams.get('service') || '').trim();
+
     let token = localStorage.getItem('pc_token');
     let user = JSON.parse(localStorage.getItem('pc_user') || 'null');
     const serviceEl = document.getElementById('service');
@@ -255,6 +275,34 @@
     const authRegisterForm = document.getElementById('auth-register-form');
     const authLoginBtn = document.getElementById('auth-login-btn');
     const authRegisterBtn = document.getElementById('auth-register-btn');
+
+    function applyModalEmbedMode() {
+      if (!isModalEmbed) {
+        return;
+      }
+      document.body.classList.add('modal-embed');
+    }
+
+    function applyPreferredServiceSelection() {
+      if (!preferredService) {
+        return;
+      }
+
+      var targetValue = preferredService.toLowerCase();
+      var matchedValue = '';
+
+      Array.from(serviceEl.options).some(function(option) {
+        if (option.value && option.value.toLowerCase() === targetValue) {
+          matchedValue = option.value;
+          return true;
+        }
+        return false;
+      });
+
+      if (matchedValue) {
+        serviceEl.value = matchedValue;
+      }
+    }
 
     function setButtonLoading(button, loading, idleText, busyText) {
       button.disabled = loading;
@@ -404,6 +452,8 @@
           serviceEl.appendChild(option);
         });
       }
+
+      applyPreferredServiceSelection();
     }
 
     async function doInlineLogin(event) {
@@ -564,6 +614,7 @@
     authLoginForm.addEventListener('submit', doInlineLogin);
     authRegisterForm.addEventListener('submit', doInlineRegister);
 
+    applyModalEmbedMode();
     setDefaultDate();
     renderSlots();
     loadServices();

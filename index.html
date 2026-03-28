@@ -7,6 +7,9 @@
   <title>Prodigious Cuts Barbershop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/dayschedule-widget@latest/dist/dayschedule-popup.css" rel="stylesheet">
+  <script src="booking-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayschedule-widget@latest/dist/dayschedule-widget.min.js" defer></script>
   <style>
     :root {
       --gold: #C8A96E;
@@ -434,7 +437,7 @@
     <a href="#gallery" onclick="closeMobileNav()">Gallery</a>
     <a href="#reviews" onclick="closeMobileNav()">Reviews</a>
     <a href="#contact" onclick="closeMobileNav()">Contact</a>
-    <a href="book.html" class="btn btn-primary" onclick="closeMobileNav()" style="margin-top:12px;">Book Now</a>
+            <a href="book.html" class="btn btn-primary" data-dayschedule-popup onclick="closeMobileNav()" style="margin-top:12px;">Book Now</a>
     <div style="display:flex;gap:12px;margin-top:8px;">
       <a href="login.html" onclick="closeMobileNav()" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Log In</a>
       <a href="login.html#register" onclick="closeMobileNav()" class="btn btn-primary" style="font-size:14px;padding:10px 24px;">Sign Up</a>
@@ -452,7 +455,7 @@
           <h1>Where <em>Precision</em> Meets Style</h1>
           <p>Fresh fades, clean lineups, beard work, kids cuts, and more — crafted by skilled barbers who take pride in every detail. Walk-ins welcome, appointments preferred.</p>
           <div class="hero-buttons">
-            <a href="tel:+12053019662" class="btn btn-primary">📞 Book Now</a>
+            <a href="book.html" class="btn btn-primary" data-dayschedule-popup>📞 Book Now</a>
             <a href="#services" class="btn btn-outline">View Services</a>
           </div>
           <div class="hero-stats">
@@ -669,7 +672,7 @@
         <h2 class="section-title">Book Your Next Cut</h2>
         <p class="section-subtitle">Walk-ins are always welcome, but appointments guarantee your spot. Give us a call to lock in your time.</p>
         <div class="booking-buttons">
-          <a href="tel:+12053019662" class="btn btn-primary">📞 (205) 301-9662</a>
+          <a href="book.html" class="btn btn-primary" data-dayschedule-popup>📞 Book Appointment</a>
           <a href="#contact" class="btn btn-outline">Send a Message</a>
         </div>
       </div>
@@ -790,6 +793,27 @@
       });
     }, { threshold: 0.12 });
     fadeEls.forEach(function(el) { observer.observe(el); });
+
+    var bookingConfig = window.PRODIGIOUS_BOOKING || {};
+    var bookingColor = bookingConfig.color || {
+      primary: '#C8A96E',
+      secondary: '#FAFAFA',
+      mode: 'dark'
+    };
+
+    document.querySelectorAll('[data-dayschedule-popup]').forEach(function(link) {
+      link.addEventListener('click', function(event) {
+        if (!window.daySchedule || !bookingConfig.dayScheduleUrl) {
+          return;
+        }
+
+        event.preventDefault();
+        daySchedule.initPopupWidget({
+          url: bookingConfig.dayScheduleUrl,
+          color: bookingColor
+        });
+      });
+    });
   </script>
 </body>
 </html>

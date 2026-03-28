@@ -2,717 +2,1017 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Prodigious Cuts Barbershop — Fresh fades, beard work, kids cuts & more. Located at 12 N Washington St, Livingston, AL. Call (205) 301-9662.">
-  <title>Prodigious Cuts Barbershop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Prodigious Cuts — Premium barbershop in Livingston, AL. Fresh fades, beard work, kids cuts. Book your appointment today.">
+  <meta name="theme-color" content="#0D0D0D">
+  <title>Prodigious Cuts — Premium Barbershop</title>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
   <style>
+    /* ─────────────────────────────────────────
+       TOKENS & RESET
+    ───────────────────────────────────────── */
     :root {
-      --gold: #C8A96E;
-      --gold-light: #E2CA9E;
-      --dark: #0D0D0D;
-      --dark-2: #1A1A1A;
-      --dark-3: #252525;
-      --white: #FAFAFA;
-      --gray: #999;
-      --radius: 12px;
+      --gold:        #C8A96E;
+      --gold-light:  #E2CA9E;
+      --gold-dim:    rgba(200,169,110,0.12);
+      --gold-glow:   rgba(200,169,110,0.25);
+      --dark:        #080808;
+      --dark-1:      #111111;
+      --dark-2:      #181818;
+      --dark-3:      #222222;
+      --dark-4:      #2c2c2c;
+      --white:       #F8F6F2;
+      --gray-1:      #AAAAAA;
+      --gray-2:      #666666;
+      --r-sm:        10px;
+      --r-md:        16px;
+      --r-lg:        24px;
+      --r-xl:        32px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html { scroll-behavior:smooth; font-size:16px; }
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--dark);
-      color: var(--white);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+      font-family:'DM Sans', 'Inter', sans-serif;
+      background:var(--dark);
+      color:var(--white);
+      line-height:1.6;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+    }
+    img { max-width:100%; display:block; }
+    a { text-decoration:none; color:inherit; }
+
+    /* ─────────────────────────────────────────
+       NOISE TEXTURE OVERLAY
+    ───────────────────────────────────────── */
+    body::before {
+      content:'';
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity:0.4;
     }
 
-    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 800; }
-    .section-tag {
-      display: inline-block;
-      font-size: 12px; font-weight: 600;
-      letter-spacing: 3px; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 12px;
-    }
-    .section-title { font-size: clamp(28px, 5vw, 48px); line-height: 1.15; margin-bottom: 16px; }
-    .section-subtitle { color: var(--gray); font-size: 16px; max-width: 520px; line-height: 1.7; }
+    /* ─────────────────────────────────────────
+       SCROLLBAR
+    ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:var(--dark-1); }
+    ::-webkit-scrollbar-thumb { background:var(--dark-4); border-radius:4px; }
 
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      gap: 8px; padding: 16px 36px; border-radius: var(--radius);
-      font-weight: 600; font-size: 15px; text-decoration: none;
-      cursor: pointer; border: none; transition: all 0.3s ease; letter-spacing: 0.5px;
+    /* ─────────────────────────────────────────
+       HEADER / NAV
+    ───────────────────────────────────────── */
+    .header {
+      position:fixed; top:0; left:0; right:0; z-index:200;
+      padding:0 20px;
+      height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:background 0.4s ease, backdrop-filter 0.4s ease;
     }
-    .btn-primary { background: var(--gold); color: var(--dark); }
-    .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(200,169,110,0.25); }
-    .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.2); }
-    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .header.scrolled {
+      background:rgba(8,8,8,0.88);
+      backdrop-filter:blur(24px);
+      -webkit-backdrop-filter:blur(24px);
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+    .header-logo img {
+      height:42px;
+      border-radius:8px;
+      object-fit:contain;
+    }
+    .header-actions { display:flex; align-items:center; gap:10px; }
+    .btn-ghost {
+      padding:9px 18px;
+      border:1.5px solid rgba(255,255,255,0.15);
+      border-radius:50px;
+      font-size:13px; font-weight:600;
+      color:var(--white);
+      transition:all 0.25s;
+    }
+    .btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
+    .btn-gold-pill {
+      padding:9px 20px;
+      background:var(--gold);
+      border-radius:50px;
+      font-size:13px; font-weight:700;
+      color:#080808;
+      transition:all 0.25s;
+    }
+    .btn-gold-pill:hover { background:var(--gold-light); transform:translateY(-1px); }
 
-    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+    /* Menu toggle */
+    .menu-btn {
+      display:none;
+      width:40px; height:40px;
+      background:var(--dark-3);
+      border:none; border-radius:10px; cursor:pointer;
+      align-items:center; justify-content:center;
+      flex-direction:column; gap:5px;
+    }
+    .menu-btn span {
+      display:block; width:18px; height:1.5px;
+      background:var(--white); border-radius:2px;
+      transition:all 0.3s;
+    }
 
-    /* ── Header ── */
-    .site-header {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 14px 0;
-      background: rgba(13,13,13,0.9);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      transition: padding 0.3s ease;
+    /* Mobile drawer */
+    .drawer {
+      display:none;
+      position:fixed; inset:0; z-index:300;
+      background:var(--dark-1);
+      flex-direction:column; align-items:center; justify-content:center; gap:28px;
     }
-    .site-header.scrolled { padding: 10px 0; }
-    .header-inner {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
+    .drawer.open { display:flex; }
+    .drawer a {
+      font-family:'Playfair Display', serif;
+      font-size:32px; font-weight:700;
+      color:var(--white); transition:color 0.2s;
     }
-    .header-left { display: flex; align-items: center; gap: 8px; }
-    .header-center { display: flex; justify-content: center; }
-    .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
-    .logo-img {
-      height: 56px;
-      width: auto;
-      display: block;
-      border-radius: 8px;
-      object-fit: contain;
+    .drawer a:hover { color:var(--gold); }
+    .drawer-close {
+      position:absolute; top:20px; right:20px;
+      background:var(--dark-3); border:none; border-radius:10px;
+      width:44px; height:44px; cursor:pointer;
+      color:var(--white); font-size:22px;
+      display:flex; align-items:center; justify-content:center;
     }
-    .nav-links { display: flex; gap: 32px; list-style: none; }
-    .nav-links a { color: var(--gray); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--white); }
-    .header-cta { display: flex; align-items: center; gap: 10px; }
-    .header-cta .btn { padding: 10px 20px; font-size: 13px; }
-    .menu-toggle {
-      display: none; width: 44px; height: 44px;
-      background: none; border: none; cursor: pointer;
-      flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-    }
-    .menu-toggle span { display: block; width: 24px; height: 2px; background: var(--white); border-radius: 2px; }
+    .drawer .drawer-cta { margin-top:12px; }
 
-    /* ── Mobile Nav ── */
-    .mobile-nav {
-      display: none; position: fixed; inset: 0; z-index: 200;
-      background: var(--dark); flex-direction: column;
-      align-items: center; justify-content: center; gap: 24px;
-    }
-    .mobile-nav.open { display: flex; }
-    .mobile-nav a { color: var(--white); text-decoration: none; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; transition: color 0.2s; }
-    .mobile-nav a:hover { color: var(--gold); }
-    .mobile-nav-close { position: absolute; top: 20px; right: 24px; width: 44px; height: 44px; background: none; border: none; cursor: pointer; color: var(--white); font-size: 28px; }
-
-    /* ── Hero ── */
+    /* ─────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────── */
     .hero {
-      min-height: 100vh; display: flex; align-items: center;
-      position: relative; overflow: hidden; padding: 120px 0 80px;
+      position:relative;
+      min-height:100svh;
+      display:flex; flex-direction:column; justify-content:flex-end;
+      padding:0 24px 100px;
+      overflow:hidden;
     }
-    .hero::before {
-      content: ''; position: absolute; inset: 0;
+
+    /* Full-bleed background image */
+    .hero-bg {
+      position:absolute; inset:0; z-index:0;
       background:
-        radial-gradient(ellipse at 20% 50%, rgba(200,169,110,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 20%, rgba(200,169,110,0.05) 0%, transparent 50%);
+        linear-gradient(to bottom, rgba(8,8,8,0.3) 0%, rgba(8,8,8,0.1) 30%, rgba(8,8,8,0.75) 65%, var(--dark) 100%),
+        url('flyer.jpg') center center / cover no-repeat;
     }
-    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
-    .hero-content h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.08; margin-bottom: 20px; }
-    .hero-content h1 em { font-style: normal; color: var(--gold); }
-    .hero-content p { color: var(--gray); font-size: 17px; line-height: 1.7; margin-bottom: 32px; max-width: 440px; }
-    .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-bg::after {
+      content:'';
+      position:absolute; inset:0;
+      background:radial-gradient(ellipse at 60% 40%, rgba(200,169,110,0.08) 0%, transparent 60%);
+    }
+
+    .hero-content {
+      position:relative; z-index:1;
+      max-width:480px;
+    }
+    .hero-kicker {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(200,169,110,0.1);
+      border:1px solid rgba(200,169,110,0.2);
+      border-radius:50px;
+      padding:6px 14px;
+      font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase;
+      color:var(--gold);
+      margin-bottom:20px;
+    }
+    .hero-kicker::before { content:'✦'; font-size:8px; }
+
+    .hero h1 {
+      font-family:'Playfair Display', serif;
+      font-size:clamp(42px, 12vw, 72px);
+      font-weight:900;
+      line-height:1.0;
+      letter-spacing:-1px;
+      margin-bottom:18px;
+    }
+    .hero h1 em {
+      font-style:italic;
+      color:var(--gold);
+    }
+    .hero-sub {
+      font-size:16px; color:var(--gray-1);
+      line-height:1.65; margin-bottom:32px; max-width:360px;
+    }
+    .hero-buttons {
+      display:flex; gap:12px; flex-wrap:wrap;
+    }
+    .btn-primary-lg {
+      padding:16px 32px;
+      background:var(--gold);
+      border-radius:50px;
+      font-size:15px; font-weight:700;
+      color:#080808;
+      display:inline-flex; align-items:center; gap:8px;
+      transition:all 0.3s;
+      box-shadow:0 8px 32px rgba(200,169,110,0.3);
+    }
+    .btn-primary-lg:hover { background:var(--gold-light); transform:translateY(-2px); box-shadow:0 12px 40px rgba(200,169,110,0.4); }
+    .btn-outline-lg {
+      padding:16px 28px;
+      border:1.5px solid rgba(255,255,255,0.2);
+      border-radius:50px;
+      font-size:15px; font-weight:600;
+      color:var(--white);
+      transition:all 0.3s;
+    }
+    .btn-outline-lg:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* Hero stats strip */
     .hero-stats {
-      display: flex; gap: 40px; margin-top: 48px;
-      padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);
+      position:absolute; bottom:28px; right:24px; z-index:1;
+      display:flex; flex-direction:column; gap:8px; align-items:flex-end;
     }
-    .hero-stat strong { display: block; font-family: 'Playfair Display', serif; font-size: 32px; color: var(--gold); }
-    .hero-stat span { font-size: 13px; color: var(--gray); font-weight: 500; }
-    .hero-image { position: relative; display: flex; align-items: center; justify-content: center; }
-    .hero-image-frame {
-      width: 100%; max-width: 460px; aspect-ratio: 4/5;
-      background: var(--dark-2); border-radius: 24px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
+    .hero-stat-badge {
+      background:rgba(8,8,8,0.7);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px;
+      padding:10px 16px;
+      display:flex; align-items:center; gap:10px;
+      min-width:160px;
     }
-    .hero-image-frame img { width: 100%; height: 100%; object-fit: cover; }
-    .hero-badge {
-      position: absolute; bottom: -20px; left: -20px;
-      background: var(--gold); color: var(--dark);
-      padding: 16px 22px; border-radius: 16px;
-      font-weight: 700; font-size: 14px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-      display: flex; align-items: center; gap: 10px;
+    .hero-stat-badge .icon { font-size:18px; }
+    .hero-stat-badge .num { font-family:'Playfair Display',serif; font-size:18px; font-weight:800; color:var(--gold); line-height:1; }
+    .hero-stat-badge .lbl { font-size:11px; color:var(--gray-1); }
+
+    /* ─────────────────────────────────────────
+       FLOATING BOOK NOW BAR (mobile)
+    ───────────────────────────────────────── */
+    .float-cta {
+      position:fixed; bottom:calc(16px + var(--safe-bottom)); left:20px; right:20px; z-index:150;
+      background:var(--gold);
+      border-radius:50px;
+      padding:16px 24px;
+      display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 8px 40px rgba(200,169,110,0.35), 0 2px 8px rgba(0,0,0,0.5);
+      transform:translateY(100px);
+      opacity:0;
+      transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+      cursor:pointer;
+      text-decoration:none;
+    }
+    .float-cta.visible { transform:translateY(0); opacity:1; }
+    .float-cta-text { font-size:15px; font-weight:700; color:#080808; }
+    .float-cta-sub { font-size:11px; color:rgba(8,8,8,0.6); margin-top:1px; }
+    .float-cta-arrow {
+      width:40px; height:40px;
+      background:rgba(8,8,8,0.12);
+      border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; color:#080808;
     }
 
-    /* ── Services ── */
-    .services { padding: 100px 0; }
-    .services-header { text-align: center; margin-bottom: 60px; }
-    .services-header .section-subtitle { margin: 0 auto; }
-    .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    /* ─────────────────────────────────────────
+       SECTION BASE
+    ───────────────────────────────────────── */
+    section { position:relative; z-index:1; }
+    .container { max-width:1100px; margin:0 auto; padding:0 24px; }
+    .section-kicker {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase;
+      color:var(--gold); margin-bottom:12px;
+    }
+    .section-kicker::before { content:'─'; }
+    .section-title {
+      font-family:'Playfair Display', serif;
+      font-size:clamp(28px, 6vw, 48px);
+      font-weight:800; line-height:1.1;
+      margin-bottom:14px;
+    }
+    .section-sub {
+      color:var(--gray-1); font-size:15px; line-height:1.7;
+      max-width:480px;
+    }
+
+    /* Reveal animation */
+    .reveal {
+      opacity:0; transform:translateY(32px);
+      transition:opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-delay-1 { transition-delay:0.1s; }
+    .reveal-delay-2 { transition-delay:0.2s; }
+    .reveal-delay-3 { transition-delay:0.3s; }
+
+    /* ─────────────────────────────────────────
+       TRUST BAR
+    ───────────────────────────────────────── */
+    .trust-bar {
+      padding:28px 0;
+      border-top:1px solid rgba(255,255,255,0.04);
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      overflow:hidden;
+    }
+    .trust-track {
+      display:flex; gap:40px;
+      animation:marquee 22s linear infinite;
+      white-space:nowrap;
+    }
+    .trust-item {
+      display:inline-flex; align-items:center; gap:10px;
+      font-size:13px; font-weight:600; color:var(--gray-2);
+      flex-shrink:0;
+    }
+    .trust-item .dot { width:5px; height:5px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ─────────────────────────────────────────
+       SERVICES
+    ───────────────────────────────────────── */
+    .services { padding:80px 0; }
+    .services-header { margin-bottom:40px; }
+    .services-scroll {
+      display:flex; gap:14px;
+      overflow-x:auto; padding-bottom:8px;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+      scroll-snap-type:x mandatory;
+    }
+    .services-scroll::-webkit-scrollbar { display:none; }
     .service-card {
-      background: var(--dark-2); border-radius: 16px; padding: 32px 28px;
-      border: 1px solid rgba(255,255,255,0.05);
-      transition: all 0.35s ease; position: relative; overflow: hidden;
+      flex-shrink:0;
+      width:240px;
+      background:var(--dark-2);
+      border:1px solid rgba(255,255,255,0.05);
+      border-radius:var(--r-lg);
+      padding:24px 20px;
+      scroll-snap-align:start;
+      transition:all 0.3s ease;
+      position:relative;
+      overflow:hidden;
     }
-    .service-card:hover { border-color: rgba(200,169,110,0.2); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
-    .service-icon {
-      width: 52px; height: 52px; background: rgba(200,169,110,0.1);
-      border-radius: 14px; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; margin-bottom: 20px;
+    .service-card::before {
+      content:'';
+      position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity:0; transition:opacity 0.3s;
     }
-    .service-card h3 { font-size: 20px; margin-bottom: 10px; font-family: 'Inter', sans-serif; font-weight: 700; }
-    .service-card p { color: var(--gray); font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
-    .service-price { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); font-weight: 800; }
-    .service-price small { font-size: 14px; color: var(--gray); font-family: 'Inter', sans-serif; font-weight: 400; }
-    .service-badge {
-      display: inline-block; background: rgba(200,169,110,0.15);
-      color: var(--gold); font-size: 11px; font-weight: 600;
-      letter-spacing: 1px; text-transform: uppercase;
-      padding: 4px 10px; border-radius: 20px; margin-bottom: 8px;
+    .service-card:hover { border-color:rgba(200,169,110,0.2); transform:translateY(-4px); }
+    .service-card:hover::before { opacity:1; }
+    .service-card.featured { background:linear-gradient(135deg,var(--dark-3),var(--dark-2)); border-color:rgba(200,169,110,0.2); }
+    .service-icon-wrap {
+      width:46px; height:46px;
+      background:var(--gold-dim);
+      border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; margin-bottom:16px;
+    }
+    .service-card h3 {
+      font-size:16px; font-weight:700; margin-bottom:6px;
+      font-family:'Inter', sans-serif;
+    }
+    .service-card p { color:var(--gray-1); font-size:13px; line-height:1.6; margin-bottom:16px; }
+    .service-price {
+      font-family:'Playfair Display', serif;
+      font-size:26px; font-weight:800; color:var(--gold);
+    }
+    .service-price sub { font-size:13px; color:var(--gray-1); font-family:'DM Sans',sans-serif; font-weight:400; }
+
+    /* ─────────────────────────────────────────
+       BARBER / ABOUT
+    ───────────────────────────────────────── */
+    .about { padding:80px 0; background:var(--dark-1); }
+    .about-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:48px; align-items:center;
+    }
+    .about-image-wrap {
+      position:relative;
+    }
+    .about-img {
+      width:100%; aspect-ratio:3/4;
+      object-fit:cover; object-position:top;
+      border-radius:var(--r-xl);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    /* Floating badge on image */
+    .about-badge {
+      position:absolute; bottom:-16px; right:-16px;
+      background:var(--gold);
+      border-radius:var(--r-md);
+      padding:16px 20px;
+      color:#080808; font-weight:700; font-size:13px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+    }
+    .about-badge .big { font-family:'Playfair Display',serif; font-size:28px; font-weight:900; line-height:1; }
+
+    .about-content { }
+    .about-lead {
+      font-size:17px; color:var(--gray-1); line-height:1.75;
+      margin-bottom:28px;
+    }
+    .about-perks { list-style:none; display:flex; flex-direction:column; gap:14px; margin-bottom:32px; }
+    .about-perks li {
+      display:flex; align-items:center; gap:12px;
+      font-size:15px; font-weight:500;
+    }
+    .perk-check {
+      width:28px; height:28px; border-radius:8px;
+      background:var(--gold-dim);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--gold); font-size:13px; font-weight:700;
+      flex-shrink:0;
     }
 
-    /* ── Policies Banner ── */
-    .policies-banner {
-      background: var(--dark-2);
-      border: 1px solid rgba(200,169,110,0.2);
-      border-radius: 16px;
-      padding: 28px 32px;
-      margin-top: 40px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      align-items: center;
-      justify-content: center;
+    /* ─────────────────────────────────────────
+       GALLERY
+    ───────────────────────────────────────── */
+    .gallery { padding:80px 0; }
+    .gallery-header {
+      display:flex; align-items:flex-end; justify-content:space-between;
+      margin-bottom:32px; gap:16px; flex-wrap:wrap;
     }
-    .policy-item {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 14px; color: var(--white);
+    .gallery-grid {
+      display:grid;
+      grid-template-columns:repeat(12, 1fr);
+      grid-template-rows:repeat(2, 180px);
+      gap:12px;
     }
-    .policy-item .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--gold); flex-shrink: 0;
+    .g-item {
+      background:var(--dark-2);
+      border-radius:var(--r-md);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.04);
+      position:relative;
+    }
+    .g-item img { width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease; }
+    .g-item:hover img { transform:scale(1.06); }
+    .g-item:nth-child(1) { grid-column:span 5; }
+    .g-item:nth-child(2) { grid-column:span 4; }
+    .g-item:nth-child(3) { grid-column:span 3; }
+    .g-item:nth-child(4) { grid-column:span 3; }
+    .g-item:nth-child(5) { grid-column:span 5; }
+    .g-item:nth-child(6) { grid-column:span 4; }
+    .g-placeholder { display:flex; align-items:center; justify-content:center; font-size:28px; opacity:0.15; }
+
+    /* ─────────────────────────────────────────
+       REVIEWS
+    ───────────────────────────────────────── */
+    .reviews { padding:80px 0; background:var(--dark-1); }
+    .reviews-header { margin-bottom:36px; }
+    .reviews-scroll {
+      display:flex; gap:14px;
+      overflow-x:auto; padding-bottom:8px;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+      scroll-snap-type:x mandatory;
+    }
+    .reviews-scroll::-webkit-scrollbar { display:none; }
+    .review-card {
+      flex-shrink:0; width:300px;
+      background:var(--dark-2);
+      border:1px solid rgba(255,255,255,0.05);
+      border-radius:var(--r-lg);
+      padding:24px;
+      scroll-snap-align:start;
+      position:relative;
+    }
+    .review-card::before {
+      content:'"';
+      position:absolute; top:16px; right:20px;
+      font-family:'Playfair Display',serif;
+      font-size:64px; line-height:1;
+      color:var(--gold-dim);
+    }
+    .review-stars { color:var(--gold); font-size:14px; letter-spacing:2px; margin-bottom:12px; }
+    .review-text { font-size:14px; line-height:1.75; color:var(--gray-1); margin-bottom:18px; font-style:italic; }
+    .review-author { display:flex; align-items:center; gap:12px; }
+    .review-avatar {
+      width:38px; height:38px; border-radius:50%;
+      background:var(--gold-dim);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:14px; color:var(--gold);
+      border:1px solid rgba(200,169,110,0.2);
+    }
+    .review-name { font-weight:700; font-size:14px; }
+    .review-handle { font-size:12px; color:var(--gray-2); }
+
+    /* ─────────────────────────────────────────
+       HOURS & LOCATION
+    ───────────────────────────────────────── */
+    .info { padding:80px 0; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    .info-card {
+      background:var(--dark-2);
+      border:1px solid rgba(255,255,255,0.05);
+      border-radius:var(--r-lg);
+      padding:28px;
+    }
+    .info-card-icon { font-size:28px; margin-bottom:14px; }
+    .info-card h3 { font-family:'Playfair Display',serif; font-size:20px; margin-bottom:16px; }
+    .hours-row {
+      display:flex; justify-content:space-between;
+      padding:10px 0; font-size:14px;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+    .hours-row:last-child { border:none; }
+    .hours-row .day { color:var(--gray-1); }
+    .hours-row .time { font-weight:600; }
+    .hours-row .closed { color:var(--gray-2); }
+    .hours-row .appt { color:var(--gold); font-size:12px; }
+    .location-detail {
+      display:flex; align-items:flex-start; gap:12px;
+      margin-bottom:18px; font-size:14px;
+    }
+    .location-detail .loc-icon {
+      width:36px; height:36px; border-radius:10px;
+      background:var(--gold-dim);
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; flex-shrink:0;
+    }
+    .location-detail h4 { font-weight:600; font-size:13px; color:var(--gray-1); margin-bottom:2px; }
+    .location-detail p { font-weight:500; font-size:14px; }
+    .location-detail a { color:var(--gold); }
+
+    /* ─────────────────────────────────────────
+       CTA BANNER
+    ───────────────────────────────────────── */
+    .cta-banner {
+      margin:0 24px 80px;
+      background:linear-gradient(135deg, var(--dark-3) 0%, var(--dark-2) 100%);
+      border:1px solid rgba(200,169,110,0.2);
+      border-radius:var(--r-xl);
+      padding:48px 40px;
+      text-align:center;
+      position:relative; overflow:hidden;
+    }
+    .cta-banner::before {
+      content:'';
+      position:absolute; inset:0;
+      background:radial-gradient(ellipse at center, rgba(200,169,110,0.08) 0%, transparent 65%);
+    }
+    .cta-banner-inner { position:relative; z-index:1; }
+    .cta-banner h2 {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(28px,6vw,44px);
+      font-weight:900; line-height:1.1;
+      margin-bottom:12px;
+    }
+    .cta-banner h2 em { font-style:italic; color:var(--gold); }
+    .cta-banner p { color:var(--gray-1); font-size:15px; margin-bottom:28px; }
+    .cta-buttons { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+    /* ─────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────── */
+    .footer {
+      padding:40px 24px calc(40px + var(--safe-bottom));
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+    .footer-inner {
+      display:flex; flex-direction:column; align-items:center; gap:20px; text-align:center;
+    }
+    .footer-logo img { height:44px; border-radius:8px; }
+    .footer-links { display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+    .footer-links a { font-size:13px; color:var(--gray-2); transition:color 0.2s; }
+    .footer-links a:hover { color:var(--gold); }
+    .footer-socials { display:flex; gap:12px; }
+    .social-btn {
+      width:40px; height:40px; border-radius:10px;
+      background:var(--dark-3); border:1px solid rgba(255,255,255,0.06);
+      display:flex; align-items:center; justify-content:center;
+      font-size:15px; color:var(--gray-1);
+      transition:all 0.2s;
+    }
+    .social-btn:hover { color:var(--gold); border-color:rgba(200,169,110,0.3); }
+    .footer-copy { font-size:12px; color:var(--gray-2); }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE — TABLET
+    ───────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .about-grid { grid-template-columns:1fr; }
+      .about-image-wrap { max-width:380px; margin:0 auto; }
+      .gallery-grid { grid-template-columns:repeat(2,1fr); grid-template-rows:auto; }
+      .g-item { grid-column:span 1 !important; aspect-ratio:1; }
+      .info-grid { grid-template-columns:1fr; }
     }
 
-    /* ── About ── */
-    .about { padding: 100px 0; background: var(--dark-2); }
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-    .about-image {
-      aspect-ratio: 4/5; background: var(--dark-3); border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+    /* ─────────────────────────────────────────
+       RESPONSIVE — MOBILE
+    ───────────────────────────────────────── */
+    @media (max-width: 600px) {
+      /* Nav */
+      .header-nav { display:none; }
+      .menu-btn { display:flex; }
+      .btn-ghost { display:none; }
+      .btn-gold-pill { padding:8px 16px; font-size:12px; }
+
+      /* Hero */
+      .hero { padding:0 20px 110px; }
+      .hero h1 { font-size:clamp(38px,13vw,56px); }
+      .hero-stats { display:none; }
+
+      /* Trust bar */
+      .trust-track { animation-duration:14s; }
+
+      /* Services */
+      .service-card { width:200px; }
+
+      /* Gallery */
+      .gallery-grid { grid-template-columns:1fr 1fr; gap:8px; }
+
+      /* Info */
+      .info-grid { grid-template-columns:1fr; }
+
+      /* CTA */
+      .cta-banner { margin:0 16px 60px; padding:36px 24px; }
+
+      /* Footer padding for float CTA */
+      .footer { padding-bottom:calc(90px + var(--safe-bottom)); }
     }
-    .about-image img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-    .about-content .section-subtitle { margin-bottom: 28px; }
-    .about-features { list-style: none; display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
-    .about-features li { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; }
-    .about-features li::before {
-      content: '✓'; display: inline-flex; align-items: center; justify-content: center;
-      width: 28px; height: 28px; background: rgba(200,169,110,0.12);
-      color: var(--gold); border-radius: 8px; font-size: 13px; font-weight: 700; flex-shrink: 0;
-    }
 
-    /* ── Gallery ── */
-    .gallery { padding: 100px 0; }
-    .gallery-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 48px; flex-wrap: wrap; gap: 20px; }
-    .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .gallery-item {
-      aspect-ratio: 1; background: var(--dark-2); border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.35s ease;
-    }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-    .gallery-item:hover img { transform: scale(1.05); }
-    .gallery-placeholder { font-size: 36px; opacity: 0.15; }
-
-    /* ── Testimonials ── */
-    .testimonials { padding: 100px 0; background: var(--dark-2); }
-    .testimonials-header { text-align: center; margin-bottom: 60px; }
-    .testimonials-header .section-subtitle { margin: 0 auto; }
-    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .testimonial-card { background: var(--dark-3); border-radius: 16px; padding: 32px 28px; border: 1px solid rgba(255,255,255,0.05); }
-    .testimonial-stars { color: var(--gold); font-size: 16px; margin-bottom: 16px; letter-spacing: 2px; }
-    .testimonial-card blockquote { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.8); margin-bottom: 20px; font-style: italic; }
-    .testimonial-author { display: flex; align-items: center; gap: 12px; }
-    .testimonial-avatar { width: 40px; height: 40px; background: var(--dark-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--gold); }
-    .testimonial-name { font-weight: 600; font-size: 14px; }
-    .testimonial-label { font-size: 12px; color: var(--gray); }
-
-    /* ── Booking CTA ── */
-    .booking { padding: 100px 0; text-align: center; position: relative; }
-    .booking::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(200,169,110,0.06) 0%, transparent 70%); }
-    .booking-inner { position: relative; z-index: 1; }
-    .booking .section-subtitle { margin: 0 auto 36px; text-align: center; }
-    .booking-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-
-    /* ── Contact ── */
-    .contact { padding: 100px 0; background: var(--dark-2); }
-    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
-    .contact-info-item { display: flex; gap: 16px; margin-bottom: 28px; }
-    .contact-info-icon { width: 48px; height: 48px; background: rgba(200,169,110,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .contact-info-item h4 { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-    .contact-info-item p { color: var(--gray); font-size: 14px; }
-    .contact-hours { background: var(--dark-3); border-radius: 16px; padding: 28px; margin-top: 20px; }
-    .contact-hours h4 { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 16px; color: var(--gold); }
-    .contact-hours-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .contact-hours-row:last-child { border: none; }
-    .contact-hours-row span:first-child { color: var(--gray); }
-    .contact-form { display: flex; flex-direction: column; gap: 16px; }
-    .form-row { display: flex; gap: 16px; }
-    .form-group { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 13px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      background: var(--dark-3); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius); padding: 14px 16px;
-      color: var(--white); font-size: 15px; font-family: 'Inter', sans-serif;
-      transition: border-color 0.2s; outline: none;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus { border-color: var(--gold); }
-    .form-group textarea { min-height: 120px; resize: vertical; }
-    .form-group select { appearance: auto; }
-
-    /* ── Footer ── */
-    .site-footer { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; }
-    .footer-logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; margin-bottom: 8px; }
-    .footer-logo span { color: var(--gold); }
-    .site-footer p { color: var(--gray); font-size: 13px; }
-    .footer-socials { display: flex; justify-content: center; gap: 16px; margin-top: 16px; }
-    .footer-socials a {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: var(--dark-2); border: 1px solid rgba(255,255,255,0.06);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--gray); text-decoration: none; font-size: 16px; transition: all 0.2s;
-    }
-    .footer-socials a:hover { color: var(--gold); border-color: rgba(200,169,110,0.3); }
-
-    /* ── Animations ── */
-    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
-    .fade-in.visible { opacity: 1; transform: translateY(0); }
-
-    /* ── Responsive ── */
-    @media (max-width: 1024px) {
-      .services-grid { grid-template-columns: repeat(2, 1fr); }
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-      .testimonials-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .header-right { display: none; }
-      .menu-toggle { display: flex; }
-      .header-inner { grid-template-columns: auto 1fr auto; }
-      .header-center { justify-content: center; }
-      .hero { padding: 100px 0 60px; min-height: auto; }
-      .hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
-      .hero-content p { margin-left: auto; margin-right: auto; }
-      .hero-buttons { justify-content: center; }
-      .hero-stats { justify-content: center; }
-      .hero-image-frame { max-width: 320px; margin: 0 auto; }
-      .hero-badge { bottom: -14px; left: 50%; transform: translateX(-50%); }
-      .services-grid { grid-template-columns: 1fr; }
-      .about-grid { grid-template-columns: 1fr; }
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-      .contact-grid { grid-template-columns: 1fr; }
-      .form-row { flex-direction: column; }
-      .services, .about, .gallery, .testimonials, .booking, .contact { padding: 60px 0; }
+    @media (min-width: 601px) {
+      .float-cta { display:none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── Header ── -->
-  <header class="site-header" id="site-header">
-    <div class="container">
-      <div class="header-inner">
-        <!-- Left: nav links + mobile toggle -->
-        <div class="header-left">
-          <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">
-            <span></span><span></span><span></span>
-          </button>
-          <ul class="nav-links">
-            <li><a href="#services">Services</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#gallery">Gallery</a></li>
-            <li><a href="#reviews">Reviews</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div>
-
-        <!-- Center: logo -->
-        <div class="header-center">
-          <a href="#hero">
-            <img src="logo.jpg" alt="Prodigious Cuts" class="logo-img">
-          </a>
-        </div>
-
-        <!-- Right: account options -->
-        <div class="header-right">
-          <a href="login.html" class="btn btn-outline" style="padding:9px 18px;font-size:13px;">Log In</a>
-          <a href="login.html#register" class="btn btn-primary" style="padding:9px 18px;font-size:13px;">Sign Up</a>
-        </div>
-      </div>
+  <!-- ── HEADER ── -->
+  <header class="header" id="header">
+    <a href="#" class="header-logo">
+      <img src="logo.jpg" alt="Prodigious Cuts">
+    </a>
+    <nav class="header-nav" style="display:flex;gap:28px;align-items:center;">
+      <a href="#services" style="font-size:14px;font-weight:500;color:var(--gray-1);transition:color 0.2s;" onmouseover="this.style.color='#F8F6F2'" onmouseout="this.style.color='#AAAAAA'">Services</a>
+      <a href="#about" style="font-size:14px;font-weight:500;color:var(--gray-1);transition:color 0.2s;" onmouseover="this.style.color='#F8F6F2'" onmouseout="this.style.color='#AAAAAA'">About</a>
+      <a href="#gallery" style="font-size:14px;font-weight:500;color:var(--gray-1);transition:color 0.2s;" onmouseover="this.style.color='#F8F6F2'" onmouseout="this.style.color='#AAAAAA'">Gallery</a>
+      <a href="#reviews" style="font-size:14px;font-weight:500;color:var(--gray-1);transition:color 0.2s;" onmouseover="this.style.color='#F8F6F2'" onmouseout="this.style.color='#AAAAAA'">Reviews</a>
+    </nav>
+    <div class="header-actions">
+      <a href="login.html" class="btn-ghost">Log In</a>
+      <a href="book.html" class="btn-gold-pill">Book Now ✦</a>
+      <button class="menu-btn" id="menu-btn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
 
-  <!-- ── Mobile Nav ── -->
-  <nav class="mobile-nav" id="mobile-nav">
-    <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close menu">&times;</button>
-    <a href="#services" onclick="closeMobileNav()">Services</a>
-    <a href="#about" onclick="closeMobileNav()">About</a>
-    <a href="#gallery" onclick="closeMobileNav()">Gallery</a>
-    <a href="#reviews" onclick="closeMobileNav()">Reviews</a>
-    <a href="#contact" onclick="closeMobileNav()">Contact</a>
-    <a href="book.html" class="btn btn-primary" onclick="closeMobileNav()" style="margin-top:12px;">Book Now</a>
-    <div style="display:flex;gap:12px;margin-top:8px;">
-      <a href="login.html" onclick="closeMobileNav()" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Log In</a>
-      <a href="login.html#register" onclick="closeMobileNav()" class="btn btn-primary" style="font-size:14px;padding:10px 24px;">Sign Up</a>
-    </div>
+  <!-- ── MOBILE DRAWER ── -->
+  <nav class="drawer" id="drawer">
+    <button class="drawer-close" id="drawer-close">✕</button>
+    <a href="#services" onclick="closeDrawer()">Services</a>
+    <a href="#about" onclick="closeDrawer()">About</a>
+    <a href="#gallery" onclick="closeDrawer()">Gallery</a>
+    <a href="#reviews" onclick="closeDrawer()">Reviews</a>
+    <a href="login.html" onclick="closeDrawer()" style="font-size:18px;color:var(--gray-1);">Log In</a>
+    <a href="book.html" class="btn-primary-lg drawer-cta" onclick="closeDrawer()">Book Appointment ✦</a>
   </nav>
 
-  <!-- ── Hero ── -->
+  <!-- ── HERO ── -->
   <section class="hero" id="hero">
-    <div class="container">
-      <div class="hero-grid">
-        <div class="hero-content fade-in">
-          <div class="section-tag">Premium Barbershop · Livingston, AL</div>
-          <h1>Where <em>Precision</em> Meets Style</h1>
-          <p>Fresh fades, clean lineups, beard work, kids cuts, and more — crafted by skilled barbers who take pride in every detail. Walk-ins welcome, appointments preferred.</p>
-          <div class="hero-buttons">
-            <a href="tel:+12053019662" class="btn btn-primary">📞 Book Now</a>
-            <a href="#services" class="btn btn-outline">View Services</a>
-          </div>
-          <div class="hero-stats">
-            <div class="hero-stat">
-              <strong>$15</strong>
-              <span>Kids Cuts</span>
-            </div>
-            <div class="hero-stat">
-              <strong>$30</strong>
-              <span>Men's Cut</span>
-            </div>
-            <div class="hero-stat">
-              <strong>5★</strong>
-              <span>Rated</span>
-            </div>
-          </div>
-        </div>
-        <div class="hero-image fade-in">
-          <div class="hero-image-frame">
-            <img src="flyer.jpg" alt="Prodigious Cuts — Fresh Fades, Beard Work, Kids Cuts">
-          </div>
-          <div class="hero-badge">
-            <div>✂️</div>
-            <div>Walk-ins Welcome</div>
-          </div>
-        </div>
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-kicker">Livingston, AL · Est. 2020</div>
+      <h1>Sharp.<br><em>Precise.</em><br>Fresh.</h1>
+      <p class="hero-sub">Premium barbershop cuts, fades, beard work, and more. Walk-ins welcome — appointments preferred.</p>
+      <div class="hero-buttons">
+        <a href="book.html" class="btn-primary-lg">Book Appointment ✦</a>
+        <a href="#services" class="btn-outline-lg">View Services</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat-badge">
+        <div class="icon">⭐</div>
+        <div><div class="num">4.9</div><div class="lbl">Google Rating</div></div>
+      </div>
+      <div class="hero-stat-badge">
+        <div class="icon">✂️</div>
+        <div><div class="num">5K+</div><div class="lbl">Cuts Done</div></div>
       </div>
     </div>
   </section>
 
-  <!-- ── Services ── -->
+  <!-- ── TRUST BAR ── -->
+  <div class="trust-bar">
+    <div class="trust-track" id="trust-track">
+      <span class="trust-item"><span class="dot"></span>Walk-Ins Welcome</span>
+      <span class="trust-item"><span class="dot"></span>Fresh Fades</span>
+      <span class="trust-item"><span class="dot"></span>Beard Work</span>
+      <span class="trust-item"><span class="dot"></span>Kids Cuts</span>
+      <span class="trust-item"><span class="dot"></span>Teen Cuts</span>
+      <span class="trust-item"><span class="dot"></span>Women's Cuts</span>
+      <span class="trust-item"><span class="dot"></span>Word Designs</span>
+      <span class="trust-item"><span class="dot"></span>Tue–Sat Open</span>
+      <span class="trust-item"><span class="dot"></span>12 N Washington St</span>
+      <span class="trust-item"><span class="dot"></span>(205) 301-9662</span>
+      <!-- Duplicate for seamless loop -->
+      <span class="trust-item"><span class="dot"></span>Walk-Ins Welcome</span>
+      <span class="trust-item"><span class="dot"></span>Fresh Fades</span>
+      <span class="trust-item"><span class="dot"></span>Beard Work</span>
+      <span class="trust-item"><span class="dot"></span>Kids Cuts</span>
+      <span class="trust-item"><span class="dot"></span>Teen Cuts</span>
+      <span class="trust-item"><span class="dot"></span>Women's Cuts</span>
+      <span class="trust-item"><span class="dot"></span>Word Designs</span>
+      <span class="trust-item"><span class="dot"></span>Tue–Sat Open</span>
+      <span class="trust-item"><span class="dot"></span>12 N Washington St</span>
+      <span class="trust-item"><span class="dot"></span>(205) 301-9662</span>
+    </div>
+  </div>
+
+  <!-- ── SERVICES ── -->
   <section class="services" id="services">
     <div class="container">
-      <div class="services-header fade-in">
-        <div class="section-tag">Services &amp; Pricing</div>
-        <h2 class="section-title">Every Cut, Every Style</h2>
-        <p class="section-subtitle">From fresh fades to kids cuts — precise, affordable, and always on point.</p>
+      <div class="services-header reveal">
+        <div class="section-kicker">Services &amp; Pricing</div>
+        <h2 class="section-title">Every Style,<br>Every Client</h2>
       </div>
-      <div class="services-grid">
-        <div class="service-card fade-in">
-          <div class="service-icon">✂️</div>
-          <div class="service-badge">Appointments</div>
+      <div class="services-scroll">
+        <div class="service-card featured reveal">
+          <div class="service-icon-wrap">✂️</div>
           <h3>Men's Haircut</h3>
-          <p>Precision cut tailored to your style. Appointments available Tuesday; walk-ins welcome Wed–Sat.</p>
-          <div class="service-price">$30</div>
+          <p>Precision cut tailored to your style. Sharp, clean, confident.</p>
+          <div class="service-price">$30 <sub>/ visit</sub></div>
         </div>
-        <div class="service-card fade-in">
-          <div class="service-icon">🪒</div>
-          <h3>Men's Beard &amp; Taper</h3>
-          <p>Sharp taper with a clean beard trim and lineup. Looking fresh from head to chin.</p>
-          <div class="service-price">$20</div>
+        <div class="service-card reveal reveal-delay-1">
+          <div class="service-icon-wrap">🪒</div>
+          <h3>Beard & Taper</h3>
+          <p>Fade and beard trim combo — looking fresh from top to bottom.</p>
+          <div class="service-price">$20 <sub>/ visit</sub></div>
         </div>
-        <div class="service-card fade-in">
-          <div class="service-icon">💇</div>
-          <h3>Women's Haircut</h3>
-          <p>Clean, styled women's cut by skilled hands. Confidence starts with a great cut.</p>
-          <div class="service-price">$20</div>
+        <div class="service-card reveal reveal-delay-2">
+          <div class="service-icon-wrap">💇‍♀️</div>
+          <h3>Women's Cut</h3>
+          <p>Clean, styled women's cut by skilled hands.</p>
+          <div class="service-price">$20 <sub>/ visit</sub></div>
         </div>
-        <div class="service-card fade-in">
-          <div class="service-icon">✨</div>
-          <h3>Women's Cut + Design</h3>
-          <p>Women's cut with custom design work — style meets artistry.</p>
-          <div class="service-price">$25</div>
+        <div class="service-card reveal reveal-delay-3">
+          <div class="service-icon-wrap">✨</div>
+          <h3>Cut + Design</h3>
+          <p>Women's cut with custom artistic design work.</p>
+          <div class="service-price">$25 <sub>/ visit</sub></div>
         </div>
-        <div class="service-card fade-in">
-          <div class="service-icon">👦</div>
+        <div class="service-card reveal">
+          <div class="service-icon-wrap">👦</div>
           <h3>Kids Cut</h3>
-          <p>For the little ones 12 &amp; under. Patient, friendly, and fun. Fresh cuts the whole family can trust.</p>
-          <div class="service-price">$15</div>
+          <p>Patient and friendly cuts for ages 12 &amp; under.</p>
+          <div class="service-price">$15 <sub>/ visit</sub></div>
         </div>
-        <div class="service-card fade-in">
-          <div class="service-icon">🧑</div>
+        <div class="service-card reveal reveal-delay-1">
+          <div class="service-icon-wrap">🧑</div>
           <h3>Teen Cut</h3>
-          <p>For teens ages 13–18. Sharp styles for every vibe.</p>
-          <div class="service-price">$20</div>
+          <p>Sharp styles for teens ages 13–18.</p>
+          <div class="service-price">$20 <sub>/ visit</sub></div>
+        </div>
+        <div class="service-card reveal reveal-delay-2">
+          <div class="service-icon-wrap">⚡</div>
+          <h3>Enhancement</h3>
+          <p>Add-on to any service — designs, details, and more.</p>
+          <div class="service-price">$5 <sub>/ add-on</sub></div>
         </div>
       </div>
-
-      <!-- Enhancements + Policies -->
-      <div class="policies-banner fade-in" style="margin-top:40px;">
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>✨ Enhancements add-on: <strong style="color:var(--gold)">$5</strong></span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>Appointments recommended</span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>Walk-ins welcome</span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>Hot Seat Option skips walk-ins, not appointments</span>
-        </div>
-        <div class="policy-item">
-          <div class="dot"></div>
-          <span>After-hours fee: <strong style="color:var(--gold)">+$10</strong></span>
-        </div>
+      <div style="margin-top:20px;display:flex;gap:20px;flex-wrap:wrap;" class="reveal">
+        <span style="font-size:13px;color:var(--gray-1);">⏰ After-hours: <strong style="color:var(--white);">+$10</strong></span>
+        <span style="font-size:13px;color:var(--gray-1);">📱 Tuesday appointments only</span>
+        <span style="font-size:13px;color:var(--gray-1);">🚶 Walk-ins welcome Wed–Sat</span>
       </div>
     </div>
   </section>
 
-  <!-- ── About ── -->
+  <!-- ── ABOUT / BARBER ── -->
   <section class="about" id="about">
     <div class="container">
       <div class="about-grid">
-        <div class="about-image fade-in">
-          <img src="barber.jpg" alt="Head Barber — Prodigious Cuts">
+        <div class="about-image-wrap reveal">
+          <img src="barber.jpg" alt="Head Barber — Prodigious Cuts" class="about-img">
+          <div class="about-badge">
+            <div class="big">10+</div>
+            <div>Years Exp.</div>
+          </div>
         </div>
-        <div class="about-content fade-in">
-          <div class="section-tag">Meet the Team</div>
-          <h2 class="section-title">Skill You Can See. Pride You Can Feel.</h2>
-          <p class="section-subtitle">Prodigious Cuts is built on a simple belief: every client deserves their best look. Our head barber brings passion, precision, and professionalism to every single cut.</p>
-          <ul class="about-features">
-            <li>Fresh fades, word designs &amp; precision lineups</li>
-            <li>Beard work done right, every time</li>
-            <li>Great with kids — patient and friendly</li>
-            <li>Walk-ins welcome, appointments preferred</li>
-            <li>Centrally located in Livingston, AL</li>
+        <div class="about-content reveal reveal-delay-1">
+          <div class="section-kicker">Meet the Barber</div>
+          <h2 class="section-title">Craft You<br>Can See</h2>
+          <p class="about-lead">Every cut at Prodigious Cuts is more than a service — it's a statement. Our head barber brings precision, passion, and personality to every single client that sits in the chair.</p>
+          <ul class="about-perks">
+            <li><div class="perk-check">✓</div> Fresh fades &amp; word designs</li>
+            <li><div class="perk-check">✓</div> Beard sculpting &amp; detail work</li>
+            <li><div class="perk-check">✓</div> Great with kids — patient &amp; fun</li>
+            <li><div class="perk-check">✓</div> Walk-ins welcome, no stress</li>
+            <li><div class="perk-check">✓</div> Central Livingston, AL location</li>
           </ul>
-          <a href="tel:+12053019662" class="btn btn-primary">📞 Call to Book</a>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="book.html" class="btn-primary-lg" style="font-size:14px;padding:14px 28px;">Book a Cut ✦</a>
+            <a href="tel:+12053019662" class="btn-outline-lg" style="font-size:14px;padding:14px 24px;">📞 Call Us</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Gallery ── -->
+  <!-- ── GALLERY ── -->
   <section class="gallery" id="gallery">
     <div class="container">
-      <div class="gallery-header fade-in">
+      <div class="gallery-header reveal">
         <div>
-          <div class="section-tag">Our Work</div>
-          <h2 class="section-title">Fresh Cuts, Every Time</h2>
+          <div class="section-kicker">Our Work</div>
+          <h2 class="section-title">Fresh Every Time</h2>
         </div>
+        <a href="#" style="font-size:13px;color:var(--gold);font-weight:600;display:inline-flex;align-items:center;gap:6px;">
+          Follow on IG →
+        </a>
       </div>
       <div class="gallery-grid">
-        <!-- Using flyer crops as gallery placeholders until real gallery photos are added -->
-        <div class="gallery-item fade-in">
-          <img src="flyer.jpg" alt="Fresh Fade" style="object-position: 15% 10%; object-fit:cover;">
+        <div class="g-item reveal">
+          <img src="flyer.jpg" alt="Barbershop work" style="object-position:15% 10%;">
         </div>
-        <div class="gallery-item fade-in">
-          <img src="flyer.jpg" alt="Word Design" style="object-position: 85% 10%; object-fit:cover;">
+        <div class="g-item reveal reveal-delay-1">
+          <img src="barber.jpg" alt="Head barber" style="object-position:center top;">
         </div>
-        <div class="gallery-item fade-in">
-          <img src="flyer.jpg" alt="Beardwork" style="object-position: 15% 60%; object-fit:cover;">
+        <div class="g-item reveal reveal-delay-2">
+          <img src="flyer.jpg" alt="Fresh fade" style="object-position:85% 20%;">
         </div>
-        <div class="gallery-item fade-in">
-          <img src="flyer.jpg" alt="Kids Cut" style="object-position: 85% 60%; object-fit:cover;">
+        <div class="g-item reveal reveal-delay-3">
+          <img src="flyer.jpg" alt="Beard work" style="object-position:15% 65%;">
         </div>
-        <div class="gallery-item fade-in">
-          <img src="barber.jpg" alt="Head Barber" style="object-position: center top; object-fit:cover;">
+        <div class="g-item reveal reveal-delay-1">
+          <img src="flyer.jpg" alt="Kids cut" style="object-position:85% 65%;">
         </div>
-        <div class="gallery-item fade-in"><div class="gallery-placeholder">✂️</div></div>
-        <div class="gallery-item fade-in"><div class="gallery-placeholder">💈</div></div>
-        <div class="gallery-item fade-in"><div class="gallery-placeholder">✂️</div></div>
+        <div class="g-item g-placeholder reveal reveal-delay-2">✂️</div>
       </div>
-      <p style="text-align:center;color:var(--gray);font-size:13px;margin-top:20px;">More photos coming soon — add your own Instagram gallery images here!</p>
+      <p style="text-align:center;color:var(--gray-2);font-size:12px;margin-top:16px;">Portfolio growing — follow Instagram for latest work</p>
     </div>
   </section>
 
-  <!-- ── Testimonials ── -->
-  <section class="testimonials" id="reviews">
+  <!-- ── REVIEWS ── -->
+  <section class="reviews" id="reviews">
     <div class="container">
-      <div class="testimonials-header fade-in">
-        <div class="section-tag">Client Reviews</div>
-        <h2 class="section-title">What Our Clients Say</h2>
-        <p class="section-subtitle">Don't just take our word for it — hear from the people who keep coming back.</p>
+      <div class="reviews-header reveal">
+        <div class="section-kicker">Client Reviews</div>
+        <h2 class="section-title">They Keep<br>Coming Back</h2>
       </div>
-      <div class="testimonials-grid">
-        <div class="testimonial-card fade-in">
-          <div class="testimonial-stars">★★★★★</div>
-          <blockquote>"Best barbershop around. Every fade is sharp and the vibe in the shop is always great. Been coming here for over a year now."</blockquote>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">M</div>
+      <div class="reviews-scroll">
+        <div class="review-card reveal">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Best barbershop around. Every fade is sharp and the vibe in the shop is always right. Wouldn't go anywhere else."</p>
+          <div class="review-author">
+            <div class="review-avatar">M</div>
+            <div><div class="review-name">Marcus J.</div><div class="review-handle">Regular client · 2 yrs</div></div>
+          </div>
+        </div>
+        <div class="review-card reveal reveal-delay-1">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Never had a lineup this clean anywhere else. They take their time and make sure everything is perfect before you walk out."</p>
+          <div class="review-author">
+            <div class="review-avatar">D</div>
+            <div><div class="review-name">DeAndre W.</div><div class="review-handle">Regular client</div></div>
+          </div>
+        </div>
+        <div class="review-card reveal reveal-delay-2">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Brought my son for his first real cut. They were so patient with him — he walked out feeling like a million bucks."</p>
+          <div class="review-author">
+            <div class="review-avatar">T</div>
+            <div><div class="review-name">Terrence P.</div><div class="review-handle">Client</div></div>
+          </div>
+        </div>
+        <div class="review-card reveal reveal-delay-3">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"The beard work alone is worth the trip. Sculpted exactly how I wanted it. I'm a customer for life."</p>
+          <div class="review-author">
+            <div class="review-avatar">J</div>
+            <div><div class="review-name">James R.</div><div class="review-handle">New client</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOURS & LOCATION ── -->
+  <section class="info" id="contact">
+    <div class="container">
+      <div style="margin-bottom:32px;" class="reveal">
+        <div class="section-kicker">Visit Us</div>
+        <h2 class="section-title">Find the Shop</h2>
+      </div>
+      <div class="info-grid">
+        <div class="info-card reveal">
+          <div class="info-card-icon">🕐</div>
+          <h3>Shop Hours</h3>
+          <div class="hours-row"><span class="day">Monday</span><span class="closed">Closed</span></div>
+          <div class="hours-row"><span class="day">Tuesday</span><span class="time">8AM – 6PM <span class="appt">· Appt Only</span></span></div>
+          <div class="hours-row"><span class="day">Wednesday</span><span class="time">8AM – 6PM</span></div>
+          <div class="hours-row"><span class="day">Thursday</span><span class="time">8AM – 6PM</span></div>
+          <div class="hours-row"><span class="day">Friday</span><span class="time">8AM – 6PM</span></div>
+          <div class="hours-row"><span class="day">Saturday</span><span class="time">8AM – 6PM</span></div>
+          <div class="hours-row"><span class="day">Sunday</span><span class="closed">Closed</span></div>
+        </div>
+        <div class="info-card reveal reveal-delay-1">
+          <div class="info-card-icon">📍</div>
+          <h3>Location</h3>
+          <div class="location-detail">
+            <div class="loc-icon">📍</div>
             <div>
-              <div class="testimonial-name">Marcus J.</div>
-              <div class="testimonial-label">Regular Client</div>
+              <h4>Address</h4>
+              <p>12 N Washington St<br>Livingston, AL 35470</p>
             </div>
           </div>
-        </div>
-        <div class="testimonial-card fade-in">
-          <div class="testimonial-stars">★★★★★</div>
-          <blockquote>"I've never had a lineup this clean anywhere else. They really take their time and make sure everything is perfect before you leave."</blockquote>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">D</div>
+          <div class="location-detail">
+            <div class="loc-icon">📞</div>
             <div>
-              <div class="testimonial-name">DeAndre W.</div>
-              <div class="testimonial-label">Regular Client</div>
+              <h4>Phone</h4>
+              <p><a href="tel:+12053019662">(205) 301-9662</a></p>
             </div>
           </div>
-        </div>
-        <div class="testimonial-card fade-in">
-          <div class="testimonial-stars">★★★★★</div>
-          <blockquote>"Brought my son for his first real haircut. They were so patient and he left feeling like a million bucks. We'll be back every month."</blockquote>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">T</div>
+          <div class="location-detail">
+            <div class="loc-icon">💬</div>
             <div>
-              <div class="testimonial-name">Terrence P.</div>
-              <div class="testimonial-label">Client</div>
+              <h4>Booking</h4>
+              <p>Call or <a href="book.html">book online</a></p>
             </div>
           </div>
+          <a href="https://maps.google.com/?q=12+N+Washington+St+Livingston+AL" target="_blank" rel="noopener"
+             style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold-dim);border:1px solid rgba(200,169,110,0.2);border-radius:10px;padding:12px;font-size:13px;font-weight:600;color:var(--gold);margin-top:8px;transition:background 0.2s;"
+             onmouseover="this.style.background='rgba(200,169,110,0.2)'" onmouseout="this.style.background='var(--gold-dim)'">
+            🗺 Open in Maps
+          </a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Booking CTA ── -->
-  <section class="booking" id="booking">
-    <div class="container">
-      <div class="booking-inner fade-in">
-        <div class="section-tag">Ready?</div>
-        <h2 class="section-title">Book Your Next Cut</h2>
-        <p class="section-subtitle">Walk-ins are always welcome, but appointments guarantee your spot. Give us a call to lock in your time.</p>
-        <div class="booking-buttons">
-          <a href="tel:+12053019662" class="btn btn-primary">📞 (205) 301-9662</a>
-          <a href="#contact" class="btn btn-outline">Send a Message</a>
-        </div>
+  <!-- ── CTA BANNER ── -->
+  <div class="cta-banner reveal">
+    <div class="cta-banner-inner">
+      <div class="section-kicker" style="justify-content:center;">Ready?</div>
+      <h2>Book Your Next<br><em>Fresh Cut</em></h2>
+      <p>Walk-ins welcome. Appointments lock in your spot.</p>
+      <div class="cta-buttons">
+        <a href="book.html" class="btn-primary-lg">Book Appointment ✦</a>
+        <a href="tel:+12053019662" class="btn-outline-lg">📞 (205) 301-9662</a>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ── Contact ── -->
-  <section class="contact" id="contact">
-    <div class="container">
-      <div class="contact-grid">
-        <div class="fade-in">
-          <div class="section-tag">Find Us</div>
-          <h2 class="section-title">Visit the Shop</h2>
-          <div style="margin-top: 28px;">
-            <div class="contact-info-item">
-              <div class="contact-info-icon">📍</div>
-              <div>
-                <h4>Location</h4>
-                <p>12 N Washington St<br>Livingston, AL 35470</p>
-              </div>
-            </div>
-            <div class="contact-info-item">
-              <div class="contact-info-icon">📞</div>
-              <div>
-                <h4>Phone</h4>
-                <p><a href="tel:+12053019662" style="color:var(--gold);text-decoration:none;">(205) 301-9662</a></p>
-              </div>
-            </div>
-          </div>
-          <div class="contact-hours">
-            <h4>Shop Hours</h4>
-            <div class="contact-hours-row">
-              <span>Monday</span>
-              <span style="color:var(--gray);">Closed</span>
-            </div>
-            <div class="contact-hours-row">
-              <span>Tuesday</span>
-              <span>Appointments Only · 8AM–6PM</span>
-            </div>
-            <div class="contact-hours-row">
-              <span>Wednesday – Saturday</span>
-              <span>8:00 AM – 6:00 PM</span>
-            </div>
-            <div class="contact-hours-row">
-              <span>Sunday</span>
-              <span style="color:var(--gray);">Closed</span>
-            </div>
-          </div>
-        </div>
-        <div class="fade-in">
-          <h2 class="section-title" style="font-size:24px;margin-bottom:24px;">Send a Message</h2>
-          <form class="contact-form" onsubmit="event.preventDefault();alert('Message sent! We\'ll get back to you shortly.');">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="c-name">Name</label>
-                <input type="text" id="c-name" placeholder="Your name" required>
-              </div>
-              <div class="form-group">
-                <label for="c-phone">Phone</label>
-                <input type="tel" id="c-phone" placeholder="(205) 000-0000">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="c-email">Email</label>
-              <input type="email" id="c-email" placeholder="you@email.com">
-            </div>
-            <div class="form-group">
-              <label for="c-service">Service</label>
-              <select id="c-service">
-                <option value="">Select a service</option>
-                <option>Men's Haircut — $30</option>
-                <option>Men's Beard &amp; Taper — $20</option>
-                <option>Women's Haircut — $20</option>
-                <option>Women's Cut + Design — $25</option>
-                <option>Kids Cut (12 &amp; under) — $15</option>
-                <option>Teen Cut (13–18) — $20</option>
-                <option>Enhancement — $5</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="c-msg">Message</label>
-              <textarea id="c-msg" placeholder="Preferred day/time or anything we should know?"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;">Send Message</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Footer ── -->
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-logo"><img src="logo.jpg" alt="Prodigious Cuts" style="height:50px;border-radius:8px;object-fit:contain;"></div>
-      <p>12 N Washington St, Livingston, AL 35470 &nbsp;·&nbsp; (205) 301-9662</p>
-      <p style="margin-top:6px;">&copy; 2026 Prodigious Cuts Barbershop. All rights reserved.</p>
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo"><img src="logo.jpg" alt="Prodigious Cuts"></div>
+      <nav class="footer-links">
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#contact">Contact</a>
+        <a href="admin.html">Admin</a>
+      </nav>
       <div class="footer-socials">
-        <a href="#" aria-label="Instagram">IG</a>
-        <a href="#" aria-label="Facebook">FB</a>
-        <a href="#" aria-label="TikTok">TK</a>
+        <a href="#" class="social-btn" aria-label="Instagram">IG</a>
+        <a href="#" class="social-btn" aria-label="Facebook">FB</a>
+        <a href="#" class="social-btn" aria-label="TikTok">TK</a>
       </div>
+      <p class="footer-copy">12 N Washington St, Livingston, AL 35470 &nbsp;·&nbsp; (205) 301-9662<br>&copy; 2026 Prodigious Cuts. All rights reserved.</p>
     </div>
   </footer>
 
+  <!-- ── FLOATING BOOK CTA (mobile) ── -->
+  <a href="book.html" class="float-cta" id="float-cta">
+    <div>
+      <div class="float-cta-text">Book Your Cut</div>
+      <div class="float-cta-sub">Tap to schedule now</div>
+    </div>
+    <div class="float-cta-arrow">✦</div>
+  </a>
+
+  <!-- ── SCRIPTS ── -->
   <script>
-    var mobileNav = document.getElementById('mobile-nav');
-    document.getElementById('menu-toggle').addEventListener('click', function() { mobileNav.classList.add('open'); });
-    document.getElementById('mobile-nav-close').addEventListener('click', closeMobileNav);
-    function closeMobileNav() { mobileNav.classList.remove('open'); }
+    // ── Header scroll effect
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 60);
+    }, {passive:true});
 
-    var header = document.getElementById('site-header');
-    window.addEventListener('scroll', function() { header.classList.toggle('scrolled', window.scrollY > 40); });
+    // ── Mobile drawer
+    const drawer = document.getElementById('drawer');
+    document.getElementById('menu-btn').addEventListener('click', () => drawer.classList.add('open'));
+    document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+    function closeDrawer() { drawer.classList.remove('open'); }
 
-    var fadeEls = document.querySelectorAll('.fade-in');
-    var observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
-      });
-    }, { threshold: 0.12 });
-    fadeEls.forEach(function(el) { observer.observe(el); });
+    // ── Reveal on scroll
+    const reveals = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(el => revealObserver.observe(el));
+
+    // ── Floating CTA appears after scrolling past hero
+    const floatCta = document.getElementById('float-cta');
+    const heroSection = document.getElementById('hero');
+    const floatObserver = new IntersectionObserver((entries) => {
+      floatCta.classList.toggle('visible', !entries[0].isIntersecting);
+    }, { threshold: 0.1 });
+    floatObserver.observe(heroSection);
   </script>
 </body>
 </html>

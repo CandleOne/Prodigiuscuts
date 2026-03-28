@@ -112,13 +112,36 @@
       return {pending:'status-pending',confirmed:'status-confirmed',completed:'status-completed',cancelled:'status-cancelled'}[s] || 'status-pending';
     }
 
+    function getAppointmentDayStart(dateText) {
+      const parts = String(dateText || '').split('-');
+      if (parts.length === 3) {
+        const y = Number(parts[0]);
+        const m = Number(parts[1]) - 1;
+        const d = Number(parts[2]);
+        if (!Number.isNaN(y) && !Number.isNaN(m) && !Number.isNaN(d)) {
+          return new Date(y, m, d);
+        }
+      }
+
+      const fallback = new Date(dateText);
+      fallback.setHours(0, 0, 0, 0);
+      return fallback;
+    }
+
     function renderAppointments(appts) {
-      const now = new Date();
-      const upcoming = appts.filter(a => new Date(a.date) >= now && a.status !== 'cancelled' && a.status !== 'completed');
-      const past = appts.filter(a => new Date(a.date) < now || a.status === 'completed' || a.status === 'cancelled');
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const isUpcomingByDay = function(a) {
+        const apptDayStart = getAppointmentDayStart(a.date);
+        return apptDayStart >= todayStart && a.status !== 'cancelled' && a.status !== 'completed';
+      };
+
+      const upcoming = appts.filter(isUpcomingByDay);
+      const past = appts.filter(a => !isUpcomingByDay(a));
 
       function apptCard(a) {
-        const isUpcoming = new Date(a.date) >= now && a.status !== 'cancelled' && a.status !== 'completed';
+        const isUpcoming = isUpcomingByDay(a);
         return `<div class="appt-card">
           <div class="appt-top">
             <div class="appt-service">${a.service}</div>
